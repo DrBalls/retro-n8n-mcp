@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.3 (January 15, 2025)
+## 📋 PROTOCOL VERSION: v1.4 (January 15, 2025)
 
 ### Protocol Changelog:
+- **v1.4** (January 15, 2025): Test coverage improvements and gitignore updates
+  - Added: Coverage check command in quick commands section
+  - Added: Note about .gitignore for coverage files in development setup
+  - Added: Test writing patterns reference in common patterns
+  - Modified: Enhanced initial status to include coverage percentage
 - **v1.3** (January 15, 2025): TaskMaster clarifications and security implementation
   - Added: TaskMaster best practices section
   - Added: Security layer implementation patterns
@@ -61,6 +66,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    "Session Status:
    - Git: [Clean/Has changes]
    - Tests: [X passing, Y failing] (from npm test)
+   - Coverage: [X%] (from npm run test:coverage)
    - Tools: [N total] ([breakdown by category])
    - Current Tasks: [X pending, Y in-progress, Z completed]
    - Next Priority: [Task #N - Title]
@@ -210,8 +216,11 @@ retro-n8n-mcp/
 │   ├── utils/                # Utility functions
 │   └── types/                # TypeScript type definitions
 ├── tests/                    # Test files
-└── docs/                     # Additional documentation
+├── docs/                     # Additional documentation
+└── .gitignore                # Includes coverage/ directory
 ```
+
+Note: Coverage files are automatically generated in `coverage/` directory and should not be committed.
 
 ## n8n API Integration
 
@@ -319,6 +328,9 @@ npm test
 
 # Run tests with coverage
 npm run test:coverage
+
+# Quick coverage check (lines only)
+npm run test:coverage 2>&1 | grep -B5 "All files" | tail -10
 
 # Lint and format
 npm run lint
@@ -515,6 +527,14 @@ const securityCheck = await securityManager.checkToolSecurity(
 - **Issue**: TaskMaster not finding tasks despite file existing
 - **Solution**: Ensure tasks.json is in `.taskmaster/tasks/` directory
 - **Alternative**: Use existing tasks.json in `/tasks/` directory
+
+### Test Writing Patterns
+When writing tests for tools:
+1. **Structure**: Create test file in same directory structure under `tests/`
+2. **Mock API Client**: Always mock N8nApiClient methods
+3. **Test Categories**: Basic Properties, Input Validation, Core Functionality, Error Handling, Response Format
+4. **Coverage Focus**: Aim for edge cases, error paths, and different input combinations
+5. **Use existing patterns**: Check similar tool tests for consistent structure
 
 ---
 
