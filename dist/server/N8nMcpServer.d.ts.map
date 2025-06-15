@@ -1,0 +1,1 @@
+{"version":3,"file":"N8nMcpServer.d.ts","sourceRoot":"","sources":["../../src/server/N8nMcpServer.ts"],"names":[],"mappings":"AAQA,qBAAa,YAAY;IACvB,OAAO,CAAC,MAAM,CAAS;;IAmBvB,OAAO,CAAC,aAAa;IAuBrB,OAAO,CAAC,iBAAiB;YAiCX,oBAAoB;YAwBpB,kBAAkB;IA2C1B,OAAO,CAAC,SAAS,EAAE,GAAG,GAAG,OAAO,CAAC,IAAI,CAAC;IAItC,KAAK,IAAI,OAAO,CAAC,IAAI,CAAC;CAG7B"}

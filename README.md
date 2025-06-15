@@ -1,0 +1,118 @@
+# n8n MCP Server
+
+A comprehensive Model Context Protocol (MCP) server for n8n that provides full access to n8n's workflow automation capabilities.
+
+## Features
+
+- **Full n8n API Coverage**: Access all n8n endpoints through MCP tools
+- **Workflow Management**: Create, read, update, delete, and manage workflows
+- **Execution Control**: Trigger, monitor, and control workflow executions
+- **Credential Management**: Secure handling of credentials for 400+ integrations
+- **Real-time Monitoring**: WebSocket/SSE support for live updates
+- **Interactive Debugging**: Step-through execution with breakpoints
+- **AI-Powered Features**: Natural language workflow generation and optimization
+
+## Installation
+
+```bash
+npm install @retro/n8n-mcp-server
+```
+
+## Configuration
+
+Create a `.env` file with your n8n configuration:
+
+```env
+N8N_API_URL=https://your-n8n-instance.com
+N8N_API_KEY=your-api-key
+```
+
+## Usage
+
+### With Claude Desktop
+
+Add to your Claude Desktop configuration:
+
+```json
+{
+  "mcpServers": {
+    "n8n": {
+      "command": "npx",
+      "args": ["@retro/n8n-mcp-server"]
+    }
+  }
+}
+```
+
+### Programmatic Usage
+
+```typescript
+import { N8nMcpServer } from '@retro/n8n-mcp-server';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+const server = new N8nMcpServer();
+const transport = new StdioServerTransport();
+
+await server.connect(transport);
+```
+
+## Available Tools
+
+### Workflow Management
+- `workflow_create` - Create new workflows
+- `workflow_update` - Update existing workflows
+- `workflow_delete` - Delete workflows
+- `workflow_list` - List workflows with filtering
+- `workflow_activate` - Activate workflows
+- `workflow_deactivate` - Deactivate workflows
+
+### Execution Management
+- `execution_trigger` - Trigger workflow execution
+- `execution_monitor` - Monitor execution progress
+- `execution_stop` - Stop running execution
+- `execution_get` - Get execution details
+- `execution_list` - List execution history
+
+### Credential Management
+- `credential_create` - Create credentials
+- `credential_update` - Update credentials
+- `credential_delete` - Delete credentials
+- `credential_test` - Test credential validity
+- `credential_list` - List available credentials
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## Architecture
+
+The server follows a modular architecture:
+
+- `src/server/` - Core MCP server implementation
+- `src/tools/` - Individual tool implementations
+- `src/services/` - Business logic and n8n API integration
+- `src/utils/` - Utility functions
+- `src/types/` - TypeScript type definitions
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines and submit pull requests to our repository.
+
+## License
+
+MIT License - see LICENSE file for details

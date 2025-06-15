@@ -1,0 +1,55 @@
+{
+  "name": "@retro/n8n-mcp-server",
+  "version": "0.1.0",
+  "description": "Comprehensive n8n MCP server providing full access to n8n's workflow automation capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "n8n",
+    "mcp",
+    "workflow",
+    "automation",
+    "integration"
+  ],
+  "author": "Retro Development Team",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.3",
+    "axios": "^1.10.0",
+    "dotenv": "^16.5.0",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.64"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "@vitest/coverage-v8": "^3.2.3",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.3",
+    "vitest": "^3.2.3"
+  }
+}
