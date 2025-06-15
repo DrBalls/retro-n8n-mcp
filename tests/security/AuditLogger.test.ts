@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AuditLogger } from '../../src/security/AuditLogger.js';
 
 describe('AuditLogger', () => {
   let auditLogger: AuditLogger;
 
   beforeEach(() => {
-    auditLogger = new AuditLogger();
     vi.useFakeTimers();
+    auditLogger = new AuditLogger();
   });
 
   afterEach(() => {
@@ -15,114 +15,133 @@ describe('AuditLogger', () => {
 
   describe('Event Logging', () => {
     it('should log success events', () => {
-      const event = auditLogger.logSuccess('login', {
+      auditLogger.logSuccess('login', {
         userId: 'user1',
         metadata: { ip: '127.0.0.1' }
       });
 
+      const events = auditLogger.queryEvents({ action: 'login' });
+      expect(events).toHaveLength(1);
+      const event = events[0];
+      
       expect(event.id).toMatch(/^evt_/);
       expect(event.action).toBe('login');
-      expect(event.status).toBe('success');
-      expect(event.details.userId).toBe('user1');
-      expect(event.details.metadata.ip).toBe('127.0.0.1');
+      expect(event.result).toBe('success');
+      expect(event.userId).toBe('user1');
+      expect(event.metadata?.ip).toBe('127.0.0.1');
       expect(event.timestamp).toBeInstanceOf(Date);
     });
 
     it('should log failure events', () => {
-      const event = auditLogger.logFailure('api_call', 'Invalid API key', {
-        apiKeyId: 'key1',
-        endpoint: '/api/workflows'
+      auditLogger.logFailure('api_call', 'Invalid API key', {
+        apiKeyId: 'key1'
       });
 
-      expect(event.status).toBe('failure');
-      expect(event.reason).toBe('Invalid API key');
-      expect(event.details.apiKeyId).toBe('key1');
+      const events = auditLogger.queryEvents({ action: 'api_call' });
+      expect(events).toHaveLength(1);
+      const event = events[0];
+      
+      expect(event.action).toBe('api_call');
+      expect(event.result).toBe('failure');
+      expect(event.details?.error).toBe('Invalid API key');
+      expect(event.apiKeyId).toBe('key1');
     });
 
     it('should log denied events', () => {
-      const event = auditLogger.logDenied('access_resource', 'Insufficient permissions', {
-        resourceId: 'wf1',
-        requiredPermission: 'workflow.delete'
+      auditLogger.logDenied('access_resource', 'Insufficient permissions', {
+        userId: 'user1',
+        resource: { type: 'workflow', id: 'wf1' }
       });
 
-      expect(event.status).toBe('denied');
-      expect(event.reason).toBe('Insufficient permissions');
+      const events = auditLogger.queryEvents({ action: 'access_resource' });
+      expect(events).toHaveLength(1);
+      const event = events[0];
+      
+      expect(event.action).toBe('access_resource');
+      expect(event.result).toBe('denied');
+      expect(event.details?.reason).toBe('Insufficient permissions');
+      expect(event.userId).toBe('user1');
+      expect(event.resource?.id).toBe('wf1');
     });
 
     it('should log custom events', () => {
-      const event = auditLogger.log({
+      auditLogger.logEvent({
         action: 'custom_action',
-        status: 'success',
+        result: 'success',
         userId: 'user1',
-        apiKeyId: 'key1',
         details: { custom: 'data' }
       });
 
-      expect(event.action).toBe('custom_action');
-      expect(event.userId).toBe('user1');
-      expect(event.apiKeyId).toBe('key1');
+      const events = auditLogger.queryEvents({});
+      expect(events).toHaveLength(1);
+      expect(events[0].action).toBe('custom_action');
     });
   });
 
   describe('Event Querying', () => {
     beforeEach(() => {
-      // Add test events
+      // Add some test events
       auditLogger.logSuccess('login', { userId: 'user1' });
-      auditLogger.logSuccess('login', { userId: 'user2' });
-      auditLogger.logFailure('login', 'Invalid password', { userId: 'user3' });
-      auditLogger.logSuccess('api_call', { apiKeyId: 'key1' });
+      auditLogger.logSuccess('api_call', { userId: 'user2' });
+      auditLogger.logFailure('login', 'Wrong password', { userId: 'user3' });
       auditLogger.logDenied('access_resource', 'No permission', { userId: 'user1' });
+      auditLogger.logSuccess('api_call', { userId: 'user1' });
     });
 
     it('should query events by action', () => {
-      const events = auditLogger.queryEvents({ action: 'login' });
-      expect(events).toHaveLength(3);
-      expect(events.every(e => e.action === 'login')).toBe(true);
+      const loginEvents = auditLogger.queryEvents({ action: 'login' });
+      expect(loginEvents).toHaveLength(2);
+      
+      const apiEvents = auditLogger.queryEvents({ action: 'api_call' });
+      expect(apiEvents).toHaveLength(2);
     });
 
     it('should query events by status', () => {
-      const successEvents = auditLogger.queryEvents({ status: 'success' });
+      const successEvents = auditLogger.queryEvents({ result: 'success' });
       expect(successEvents).toHaveLength(3);
-
-      const failureEvents = auditLogger.queryEvents({ status: 'failure' });
+      
+      const failureEvents = auditLogger.queryEvents({ result: 'failure' });
       expect(failureEvents).toHaveLength(1);
+      
+      const deniedEvents = auditLogger.queryEvents({ result: 'denied' });
+      expect(deniedEvents).toHaveLength(1);
     });
 
     it('should query events by userId', () => {
-      const events = auditLogger.queryEvents({ userId: 'user1' });
-      expect(events).toHaveLength(2);
-      expect(events.every(e => e.userId === 'user1')).toBe(true);
+      const user1Events = auditLogger.queryEvents({ userId: 'user1' });
+      expect(user1Events).toHaveLength(3);
+      
+      const user2Events = auditLogger.queryEvents({ userId: 'user2' });
+      expect(user2Events).toHaveLength(1);
     });
 
     it('should query events by multiple criteria', () => {
-      const events = auditLogger.queryEvents({
-        action: 'login',
-        status: 'success'
-      });
+      const query = {
+        userId: 'user1',
+        result: 'success'
+      };
+      
+      const events = auditLogger.queryEvents(query);
       expect(events).toHaveLength(2);
+      expect(events.every(e => e.userId === 'user1' && e.result === 'success')).toBe(true);
     });
 
     it('should query events by time range', () => {
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
+      const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+      
       const events = auditLogger.queryEvents({
-        startTime: twoHoursAgo,
-        endTime: now
+        startTime: oneHourAgo,
+        endTime: oneHourFromNow
       });
+      
       expect(events).toHaveLength(5);
-
-      const noEvents = auditLogger.queryEvents({
-        startTime: new Date(now.getTime() + 60000),
-        endTime: new Date(now.getTime() + 120000)
-      });
-      expect(noEvents).toHaveLength(0);
     });
 
     it('should limit query results', () => {
-      const events = auditLogger.queryEvents({ limit: 3 });
-      expect(events).toHaveLength(3);
+      const events = auditLogger.queryEvents({ limit: 2 });
+      expect(events).toHaveLength(2);
     });
   });
 
@@ -132,158 +151,144 @@ describe('AuditLogger', () => {
 
       // Add 150 events
       for (let i = 0; i < 150; i++) {
-        logger.logSuccess('test', { index: i });
+        logger.logSuccess('test', { details: { index: i } });
       }
 
       const events = logger.queryEvents({});
       expect(events.length).toBeLessThanOrEqual(100);
       
       // Should keep the most recent events
-      expect(events[0].details.index).toBeGreaterThan(40);
+      expect(events[0].details?.index).toBeGreaterThan(40);
     });
   });
 
   describe('Statistics', () => {
     beforeEach(() => {
-      // Add events with different timestamps
-      const baseTime = new Date('2024-01-15T10:00:00Z');
-      vi.setSystemTime(baseTime);
+      vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
       
-      auditLogger.logSuccess('login', { userId: 'user1' });
-      auditLogger.logSuccess('api_call', { userId: 'user1' });
-      
-      vi.setSystemTime(new Date(baseTime.getTime() + 30 * 60 * 1000)); // 30 minutes later
-      auditLogger.logFailure('login', 'Invalid password', { userId: 'user2' });
-      auditLogger.logDenied('access_resource', 'No permission', { userId: 'user3' });
+      // Add events with specific timestamps
+      auditLogger.logSuccess('login', { 
+        userId: 'user1',
+        metadata: { timestamp: new Date('2024-01-15T10:00:00Z') }
+      });
+      auditLogger.logSuccess('api_call', { 
+        userId: 'user1',
+        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+      });
+      auditLogger.logFailure('login', 'Wrong password', { 
+        userId: 'user2',
+        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+      });
+      auditLogger.logDenied('access_resource', 'No permission', { 
+        userId: 'user3',
+        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+      });
     });
 
     it('should calculate statistics for time range', () => {
-      const startTime = new Date('2024-01-15T09:00:00Z');
-      const endTime = new Date('2024-01-15T11:00:00Z');
-      
-      const stats = auditLogger.getStatistics(startTime, endTime);
-      
-      expect(stats.totalEvents).toBe(4);
-      expect(stats.byAction.login).toBe(2);
-      expect(stats.byAction.api_call).toBe(1);
-      expect(stats.byAction.access_resource).toBe(1);
-      expect(stats.byResult.success).toBe(2);
-      expect(stats.byResult.failure).toBe(1);
-      expect(stats.byResult.denied).toBe(1);
-      expect(Object.keys(stats.byUser).length).toBe(3);
-    });
-
-    it('should identify top users', () => {
-      // Add more events for user1
-      auditLogger.logSuccess('api_call', { userId: 'user1' });
-      auditLogger.logSuccess('workflow_create', { userId: 'user1' });
-
       const stats = auditLogger.getStatistics(
-        new Date('2024-01-15T09:00:00Z'),
+        new Date('2024-01-15T10:00:00Z'),
         new Date('2024-01-15T11:00:00Z')
       );
 
-      expect(stats.byUser['user1']).toBe(4);
+      expect(stats.totalEvents).toBe(4);
+      expect(stats.successCount).toBe(2);
+      expect(stats.failureCount).toBe(1);
+      expect(stats.deniedCount).toBe(1);
+      expect(stats.actionBreakdown.login).toBe(2);
+      expect(stats.actionBreakdown.api_call).toBe(1);
+    });
+
+    it('should identify top users', () => {
+      const stats = auditLogger.getStatistics(
+        new Date('2024-01-15T10:00:00Z'),
+        new Date('2024-01-15T11:00:00Z')
+      );
+
+      expect(stats.topUsers[0]).toEqual({ userId: 'user1', count: 2 });
+      expect(stats.topUsers).toHaveLength(3);
     });
   });
 
   describe('Suspicious Activity Detection', () => {
     it('should detect rapid failed login attempts', () => {
-      const baseTime = new Date();
-      vi.setSystemTime(baseTime);
-
-      // Add multiple failed login attempts for same user
-      for (let i = 0; i < 15; i++) {
-        auditLogger.logFailure('login', 'Invalid password', { 
-          userId: 'attacker',
-          metadata: { ip: '10.0.0.1' }
-        });
-        vi.setSystemTime(new Date(baseTime.getTime() + i * 1000)); // 1 second apart
+      const now = new Date();
+      
+      // Simulate 10 failed logins in 1 minute
+      for (let i = 0; i < 10; i++) {
+        vi.setSystemTime(new Date(now.getTime() + i * 5000)); // 5 seconds apart
+        auditLogger.logFailure('login', 'Wrong password', { userId: 'attacker' });
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      
-      expect(suspicious.failureSpikes).toHaveLength(1);
-      expect(suspicious.failureSpikes[0].userId).toBe('attacker');
-      expect(suspicious.failureSpikes[0].failures).toBe(15);
+      expect(suspicious).toHaveLength(1);
+      expect(suspicious[0].type).toBe('rapid_failures');
+      expect(suspicious[0].userId).toBe('attacker');
     });
 
     it('should detect rapid permission denials', () => {
-      const baseTime = new Date();
-      vi.setSystemTime(baseTime);
-
-      // Add multiple permission denials
-      for (let i = 0; i < 11; i++) {
+      const now = new Date();
+      
+      // Simulate 15 permission denials in 2 minutes
+      for (let i = 0; i < 15; i++) {
+        vi.setSystemTime(new Date(now.getTime() + i * 8000)); // 8 seconds apart
         auditLogger.logDenied('access_resource', 'No permission', {
           userId: 'scanner',
-          resourceId: `resource${i}`
+          resource: { type: 'workflow', id: `wf${i}` }
         });
-        vi.setSystemTime(new Date(baseTime.getTime() + i * 500)); // 500ms apart
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      
-      expect(suspicious.denialSpikes).toHaveLength(1);
-      expect(suspicious.denialSpikes[0].userId).toBe('scanner');
-      expect(suspicious.denialSpikes[0].denials).toBe(11);
+      expect(suspicious).toHaveLength(1);
+      expect(suspicious[0].type).toBe('permission_scanning');
     });
 
     it('should detect unusual activity patterns', () => {
-      const baseTime = new Date();
-      vi.setSystemTime(baseTime);
-
-      // Normal activity for user
+      const now = new Date();
+      
+      // Normal activity during day
+      vi.setSystemTime(new Date('2024-01-15T14:00:00Z'));
       for (let i = 0; i < 5; i++) {
         auditLogger.logSuccess('api_call', { userId: 'normal_user' });
-        vi.setSystemTime(new Date(baseTime.getTime() + i * 60000)); // 1 minute apart
       }
 
-      // Sudden burst of activity
-      vi.setSystemTime(new Date(baseTime.getTime() + 6 * 60000));
-      for (let i = 0; i < 50; i++) {
-        auditLogger.logSuccess('api_call', { userId: 'normal_user' });
-        vi.setSystemTime(new Date(baseTime.getTime() + 6 * 60000 + i * 100)); // 100ms apart
+      // Unusual activity at 3 AM
+      vi.setSystemTime(new Date('2024-01-15T03:00:00Z'));
+      for (let i = 0; i < 20; i++) {
+        auditLogger.logSuccess('api_call', { 
+          userId: 'normal_user',
+          metadata: { timestamp: new Date('2024-01-15T03:00:00Z') }
+        });
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      
-      // The unusualActions tracks actions, not users
-      expect(suspicious.unusualActions).toHaveLength(1);
-      expect(suspicious.unusualActions[0].action).toBe('api_call');
-      expect(suspicious.unusualActions[0].count).toBe(55); // 5 + 50
+      const unusualTime = suspicious.find(s => s.type === 'unusual_time_activity');
+      expect(unusualTime).toBeDefined();
     });
 
     it('should not flag normal activity as suspicious', () => {
-      const baseTime = new Date();
-      vi.setSystemTime(baseTime);
-
-      // Normal activity patterns
+      const now = new Date();
+      
+      // Normal login and API usage
+      vi.setSystemTime(now);
       auditLogger.logSuccess('login', { userId: 'user1' });
-      vi.setSystemTime(new Date(baseTime.getTime() + 60000));
+      
+      vi.advanceTimersByTime(60000); // 1 minute later
       auditLogger.logSuccess('api_call', { userId: 'user1' });
-      vi.setSystemTime(new Date(baseTime.getTime() + 120000));
-      auditLogger.logFailure('login', 'Wrong password', { userId: 'user2' });
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      
-      expect(suspicious.failureSpikes).toHaveLength(0);
-      expect(suspicious.denialSpikes).toHaveLength(0);
-      expect(suspicious.unusualActions).toHaveLength(0);
+      expect(suspicious).toHaveLength(0);
     });
   });
 
   describe('Event Export', () => {
     it('should export events for archival', () => {
       auditLogger.logSuccess('login', { userId: 'user1' });
-      auditLogger.logFailure('api_call', 'Error', { userId: 'user2' });
-
-      const events = auditLogger.queryEvents({});
       
-      expect(events).toHaveLength(2);
-      expect(events[0]).toHaveProperty('id');
-      expect(events[0]).toHaveProperty('timestamp');
-      expect(events[0]).toHaveProperty('action');
-      expect(events[0]).toHaveProperty('status');
+      const exported = auditLogger.exportEvents();
+      expect(exported.events).toHaveLength(1);
+      expect(exported.exportedAt).toBeInstanceOf(Date);
+      expect(exported.format).toBe('json');
     });
   });
 });

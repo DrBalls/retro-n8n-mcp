@@ -42,14 +42,20 @@ describe('Authorization', () => {
 
     it('should delete a role', () => {
       authorization.createRole({
-        id: 'viewer',
-        name: 'Viewer',
+        id: 'custom-role',
+        name: 'Custom Role',
         permissions: ['*.read']
       });
 
-      const deleted = authorization.deleteRole('viewer');
+      const deleted = authorization.deleteRole('custom-role');
       expect(deleted).toBe(true);
-      expect(authorization.getRole('viewer')).toBeUndefined();
+      expect(authorization.getRole('custom-role')).toBeUndefined();
+    });
+
+    it('should not delete default roles', () => {
+      const deleted = authorization.deleteRole('viewer');
+      expect(deleted).toBe(false);
+      expect(authorization.getRole('viewer')).toBeDefined();
     });
 
     it('should list all roles', () => {

@@ -35,8 +35,12 @@ export interface IAuditQuery {
 export class AuditLogger {
   private logger = new Logger('AuditLogger');
   private events: IAuditEvent[] = [];
-  private maxEvents = 10000; // Keep last N events in memory
+  private maxEvents: number;
   private eventHandlers: ((event: IAuditEvent) => void)[] = [];
+
+  constructor(maxEvents = 10000) {
+    this.maxEvents = maxEvents;
+  }
 
   /**
    * Log an audit event
@@ -253,8 +257,16 @@ export class AuditLogger {
   /**
    * Export events for persistence
    */
-  exportEvents(query?: IAuditQuery): IAuditEvent[] {
-    return query ? this.queryEvents(query) : [...this.events];
+  exportEvents(query?: IAuditQuery): {
+    events: IAuditEvent[];
+    exportedAt: Date;
+    format: string;
+  } {
+    return {
+      events: query ? this.queryEvents(query) : [...this.events],
+      exportedAt: new Date(),
+      format: 'json'
+    };
   }
 
   /**
@@ -372,5 +384,145 @@ export class AuditLogger {
       denialSpikes,
       unusualActions
     };
+  }
+
+  /**
+   * Get statistics for a time range
+   */
+  getStatistics(startTime: Date, endTime: Date): {
+    totalEvents: number;
+    successCount: number;
+    failureCount: number;
+    deniedCount: number;
+    actionBreakdown: Record<string, number>;
+    topUsers: Array<{ userId: string; count: number }>;
+  } {
+    const events = this.queryEvents({ startTime, endTime });
+    
+    const stats = {
+      totalEvents: events.length,
+      successCount: events.filter(e => e.result === 'success').length,
+      failureCount: events.filter(e => e.result === 'failure').length,
+      deniedCount: events.filter(e => e.result === 'denied').length,
+      actionBreakdown: {} as Record<string, number>,
+      topUsers: [] as Array<{ userId: string; count: number }>
+    };
+
+    // Action breakdown
+    events.forEach(event => {
+      stats.actionBreakdown[event.action] = (stats.actionBreakdown[event.action] || 0) + 1;
+    });
+
+    // Top users
+    const userCounts = new Map<string, number>();
+    events.forEach(event => {
+      if (event.userId) {
+        userCounts.set(event.userId, (userCounts.get(event.userId) || 0) + 1);
+      }
+    });
+
+    stats.topUsers = Array.from(userCounts.entries())
+      .map(([userId, count]) => ({ userId, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return stats;
+  }
+
+  /**
+   * Detect suspicious activity patterns
+   */
+  detectSuspiciousActivity(): Array<{
+    type: string;
+    userId?: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high';
+  }> {
+    const suspicious: Array<{
+      type: string;
+      userId?: string;
+      description: string;
+      severity: 'low' | 'medium' | 'high';
+    }> = [];
+
+    const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    const recentEvents = this.queryEvents({ startTime: fiveMinutesAgo });
+
+    // Check for rapid failures
+    const failuresByUser = new Map<string, number>();
+    recentEvents
+      .filter(e => e.result === 'failure' && e.action === 'login')
+      .forEach(e => {
+        if (e.userId) {
+          failuresByUser.set(e.userId, (failuresByUser.get(e.userId) || 0) + 1);
+        }
+      });
+
+    failuresByUser.forEach((count, userId) => {
+      if (count >= 5) {
+        suspicious.push({
+          type: 'rapid_failures',
+          userId,
+          description: `${count} failed login attempts in 5 minutes`,
+          severity: count >= 10 ? 'high' : 'medium'
+        });
+      }
+    });
+
+    // Check for permission scanning
+    const denialsByUser = new Map<string, number>();
+    recentEvents
+      .filter(e => e.result === 'denied')
+      .forEach(e => {
+        if (e.userId) {
+          denialsByUser.set(e.userId, (denialsByUser.get(e.userId) || 0) + 1);
+        }
+      });
+
+    denialsByUser.forEach((count, userId) => {
+      if (count >= 10) {
+        suspicious.push({
+          type: 'permission_scanning',
+          userId,
+          description: `${count} permission denials in 5 minutes`,
+          severity: count >= 20 ? 'high' : 'medium'
+        });
+      }
+    });
+
+    // Check for unusual time activity
+    const hourlyActivity = new Map<number, number>();
+    this.events.forEach(e => {
+      const hour = e.timestamp.getHours();
+      hourlyActivity.set(hour, (hourlyActivity.get(hour) || 0) + 1);
+    });
+
+    // Check current hour activity
+    const currentHour = now.getHours();
+    const isNightTime = currentHour >= 0 && currentHour <= 6;
+    const currentActivity = recentEvents.length;
+
+    if (isNightTime && currentActivity > 10) {
+      const userActivity = new Map<string, number>();
+      recentEvents.forEach(e => {
+        if (e.userId) {
+          userActivity.set(e.userId, (userActivity.get(e.userId) || 0) + 1);
+        }
+      });
+
+      userActivity.forEach((count, userId) => {
+        if (count > 5) {
+          suspicious.push({
+            type: 'unusual_time_activity',
+            userId,
+            description: `High activity (${count} events) during night hours`,
+            severity: 'low'
+          });
+        }
+      });
+    }
+
+    return suspicious;
   }
 }
