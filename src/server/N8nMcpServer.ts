@@ -41,6 +41,12 @@ import {
   GetCredentialTool,
 } from '../tools/credential/index.js';
 import { Logger, LogLevel } from '../utils/Logger.js';
+import { SecurityManager, ISecurityConfig, ISecurityContext, IApiKey } from '../security/index.js';
+
+export interface IN8nMcpServerConfig {
+  apiConfig?: Partial<N8nApiConfig>;
+  security?: ISecurityConfig;
+}
 
 export class N8nMcpServer {
   private server: Server;
@@ -51,9 +57,23 @@ export class N8nMcpServer {
   private requestCount = 0;
   private errorCount = 0;
   private baseUrl?: string;
+  private security: SecurityManager;
 
-  constructor(apiConfig?: Partial<N8nApiConfig>) {
+  constructor(config?: IN8nMcpServerConfig | Partial<N8nApiConfig>) {
     this.startTime = new Date();
+    
+    // Handle both old and new config formats
+    let apiConfig: Partial<N8nApiConfig> | undefined;
+    let securityConfig: ISecurityConfig | undefined;
+    
+    if (config && 'apiConfig' in config) {
+      // New format
+      apiConfig = config.apiConfig;
+      securityConfig = config.security;
+    } else {
+      // Old format (backward compatibility)
+      apiConfig = config;
+    }
     
     this.server = new Server(
       {
@@ -71,6 +91,9 @@ export class N8nMcpServer {
 
     // Log server initialization
     this.log('info', 'Initializing n8n MCP server');
+
+    // Initialize security
+    this.security = new SecurityManager(securityConfig);
 
     // Initialize tool registry
     this.toolRegistry = new ToolRegistry();
@@ -186,6 +209,52 @@ export class N8nMcpServer {
       this.log('debug', `Handling tool call: ${name}`, args);
 
       try {
+        // Extract security context from request
+        const securityContext: ISecurityContext = {
+          // In a real implementation, these would come from:
+          // - API key from Authorization header
+          // - User ID from authenticated session
+          // - Metadata from request headers
+          apiKey: (request as any).apiKey,
+          userId: (request as any).userId,
+          metadata: {
+            ip: (request as any).ip,
+            userAgent: (request as any).userAgent,
+            sessionId: (request as any).sessionId
+          }
+        };
+
+        // Get tool metadata to determine permission
+        const tool = this.toolRegistry.getTool(name);
+        const permission = tool?.getMetadata ? 
+          `${tool.getMetadata().category}.${name}` : 
+          `tool.${name}`;
+
+        // Check security
+        const securityCheck = await this.security.checkToolSecurity(
+          name,
+          permission,
+          securityContext
+        );
+
+        if (!securityCheck.allowed) {
+          this.log('warn', `Tool call denied: ${name}`, {
+            reason: securityCheck.reason,
+            retryAfter: securityCheck.retryAfter
+          });
+
+          if (securityCheck.retryAfter) {
+            throw new N8nRateLimitError(
+              securityCheck.reason || 'Rate limit exceeded',
+              securityCheck.retryAfter
+            );
+          }
+
+          throw new N8nAuthenticationError(
+            securityCheck.reason || 'Access denied'
+          );
+        }
+
         // Update context before executing tool
         this.updateToolContext();
         
@@ -302,12 +371,34 @@ export class N8nMcpServer {
     return Date.now() - this.startTime.getTime();
   }
 
-  getStats(): { totalRequests: number; totalErrors: number; errorRate: number } {
-    return {
+  getStats(): { totalRequests: number; totalErrors: number; errorRate: number; security?: any } {
+    const stats = {
       totalRequests: this.requestCount,
       totalErrors: this.errorCount,
       errorRate: this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0,
     };
+
+    // Add security stats if available
+    try {
+      const securityStats = this.security.getSecurityStatistics(
+        new Date(Date.now() - 60 * 60 * 1000), // Last hour
+        new Date()
+      );
+      
+      return {
+        ...stats,
+        security: {
+          auditEvents: securityStats.audit.totalEvents,
+          suspiciousActivity: securityStats.suspiciousActivity,
+          rateLimits: securityStats.rateLimit.limits.map(l => ({
+            name: l.name,
+            activeKeys: l.activeKeys
+          }))
+        }
+      };
+    } catch {
+      return stats;
+    }
   }
 
   isHealthy(): boolean {
@@ -316,5 +407,18 @@ export class N8nMcpServer {
     if (!this.isConnected) return false;
     if (this.requestCount === 0) return true;
     return this.errorCount < this.requestCount * 0.5;
+  }
+
+  // Security management methods
+  getSecurity(): SecurityManager {
+    return this.security;
+  }
+
+  createApiKey(name: string, permissions: string[], userId?: string): IApiKey {
+    return this.security.createApiKey(name, permissions, userId);
+  }
+
+  revokeApiKey(id: string): boolean {
+    return this.security.revokeApiKey(id);
   }
 }
