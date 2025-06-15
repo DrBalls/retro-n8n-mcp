@@ -1,15 +1,17 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { z } from 'zod';
 import { ListToolsRequestSchema, CallToolRequestSchema, ErrorCode, McpError, } from '@modelcontextprotocol/sdk/types.js';
 import { N8nApiClient } from '../services/N8nApiClient.js';
 import { N8nApiError, N8nAuthenticationError, N8nConnectionError, N8nRateLimitError, } from '../utils/errors.js';
+import { ToolRegistry, ServerHealthTool, TestConnectionTool, ListWorkflowsTool, CreateWorkflowTool, } from '../tools/index.js';
 export class N8nMcpServer {
     server;
     apiClient = null;
+    toolRegistry;
     isConnected = false;
     startTime;
     requestCount = 0;
     errorCount = 0;
+    baseUrl;
     constructor(apiConfig) {
         this.startTime = new Date();
         this.server = new Server({
@@ -24,10 +26,13 @@ export class N8nMcpServer {
         });
         // Log server initialization
         this.log('info', 'Initializing n8n MCP server');
+        // Initialize tool registry
+        this.toolRegistry = new ToolRegistry();
         // Initialize API client if config provided
         if (apiConfig?.baseUrl && apiConfig?.apiKey) {
             try {
                 this.apiClient = new N8nApiClient(apiConfig);
+                this.baseUrl = apiConfig.baseUrl;
                 this.log('info', 'n8n API client initialized successfully');
             }
             catch (error) {
@@ -37,8 +42,42 @@ export class N8nMcpServer {
         else {
             this.log('warn', 'n8n API client not configured - some features will be unavailable');
         }
+        // Register tools
+        this.registerTools();
+        // Setup handlers
         this.setupHandlers();
         this.setupErrorHandling();
+    }
+    registerTools() {
+        // Always register system tools
+        this.toolRegistry.register(new ServerHealthTool());
+        // Register n8n tools if API client is available
+        if (this.apiClient) {
+            this.toolRegistry.register(new TestConnectionTool());
+            this.toolRegistry.register(new ListWorkflowsTool());
+            this.toolRegistry.register(new CreateWorkflowTool());
+        }
+        // Update tool registry context
+        this.updateToolContext();
+        // Listen to tool events
+        this.toolRegistry.on('tool:executed', (toolName, duration) => {
+            this.log('debug', `Tool ${toolName} executed in ${duration}ms`);
+        });
+        this.toolRegistry.on('tool:error', (toolName, error) => {
+            this.log('error', `Tool ${toolName} error`, error);
+        });
+    }
+    updateToolContext() {
+        const context = {
+            apiClient: this.apiClient || undefined,
+            metadata: {
+                version: '0.1.0',
+                uptime: this.getUptime(),
+                serverStats: this.getStats(),
+                baseUrl: this.apiClient ? this.baseUrl : undefined,
+            },
+        };
+        this.toolRegistry.updateContext(context);
     }
     setupHandlers() {
         // Handle list tools request
@@ -46,8 +85,10 @@ export class N8nMcpServer {
             this.requestCount++;
             this.log('debug', 'Handling list tools request');
             try {
+                // Update context before listing tools
+                this.updateToolContext();
                 return {
-                    tools: this.getAvailableTools(),
+                    tools: this.toolRegistry.toMcpTools(),
                 };
             }
             catch (error) {
@@ -62,21 +103,11 @@ export class N8nMcpServer {
             const { name, arguments: args } = request.params;
             this.log('debug', `Handling tool call: ${name}`, args);
             try {
-                let result;
-                switch (name) {
-                    case 'workflow_list':
-                        result = await this.handleWorkflowList(args);
-                        break;
-                    case 'test_connection':
-                        result = await this.handleTestConnection();
-                        break;
-                    case 'server_health':
-                        result = await this.handleServerHealth();
-                        break;
-                    default:
-                        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
-                }
-                this.log('debug', `Tool call ${name} completed`, result);
+                // Update context before executing tool
+                this.updateToolContext();
+                // Execute tool through registry
+                const result = await this.toolRegistry.execute(name, args || {});
+                this.log('debug', `Tool call ${name} completed`);
                 return result;
             }
             catch (error) {
@@ -131,174 +162,6 @@ export class N8nMcpServer {
         const timestamp = new Date().toISOString();
         const logData = data ? ` ${JSON.stringify(data)}` : '';
         console.error(`[${timestamp}] [${level.toUpperCase()}] ${message}${logData}`);
-    }
-    getAvailableTools() {
-        const tools = [
-            {
-                name: 'server_health',
-                description: 'Get the health status of the MCP server',
-                inputSchema: {
-                    type: 'object',
-                    properties: {},
-                    required: [],
-                },
-            },
-        ];
-        // Only include n8n tools if API client is configured
-        if (this.apiClient) {
-            tools.push({
-                name: 'test_connection',
-                description: 'Test connection to n8n instance',
-                inputSchema: {
-                    type: 'object',
-                    properties: {},
-                    required: [],
-                },
-            }, {
-                name: 'workflow_list',
-                description: 'List all workflows in the n8n instance',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        active: {
-                            type: 'boolean',
-                            description: 'Filter by active status',
-                        },
-                        limit: {
-                            type: 'number',
-                            description: 'Maximum number of workflows to return',
-                            default: 10,
-                        },
-                        tags: {
-                            type: 'array',
-                            items: {
-                                type: 'string',
-                            },
-                            description: 'Filter by workflow tags',
-                        },
-                    },
-                    required: [],
-                },
-            });
-        }
-        return tools;
-    }
-    async handleTestConnection() {
-        try {
-            if (!this.apiClient) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'n8n API client not configured. Please set N8N_API_URL and N8N_API_KEY environment variables.',
-                        },
-                    ],
-                };
-            }
-            const result = await this.apiClient.testConnection();
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: result.connected
-                            ? 'Connection test successful! Connected to n8n instance.'
-                            : 'Connection test failed. Please check your configuration.',
-                    },
-                ],
-            };
-        }
-        catch (error) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                    },
-                ],
-            };
-        }
-    }
-    async handleWorkflowList(args) {
-        try {
-            if (!this.apiClient) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'n8n API client not configured. Please set N8N_API_URL and N8N_API_KEY environment variables.',
-                        },
-                    ],
-                };
-            }
-            // Validate arguments
-            const schema = z.object({
-                active: z.boolean().optional(),
-                limit: z.number().min(1).max(100).default(10),
-                tags: z.array(z.string()).optional(),
-            });
-            const { active, limit, tags } = schema.parse(args || {});
-            // Call n8n API
-            const response = await this.apiClient.getWorkflows({
-                ...(active !== undefined && { active }),
-                limit,
-                ...(tags && { tags }),
-            });
-            // Format response
-            const workflows = response.data.map(workflow => ({
-                id: workflow.id,
-                name: workflow.name,
-                active: workflow.active,
-                tags: workflow.tags,
-                createdAt: workflow.createdAt,
-                updatedAt: workflow.updatedAt,
-                nodeCount: workflow.nodes.length,
-            }));
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: JSON.stringify(workflows, null, 2),
-                    },
-                ],
-            };
-        }
-        catch (error) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Error listing workflows: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                    },
-                ],
-            };
-        }
-    }
-    async handleServerHealth() {
-        const uptime = Date.now() - this.startTime.getTime();
-        const health = {
-            status: 'healthy',
-            version: '0.1.0',
-            uptime: Math.floor(uptime / 1000),
-            isConnected: this.isConnected,
-            apiClientConfigured: this.apiClient !== null,
-            stats: {
-                totalRequests: this.requestCount,
-                totalErrors: this.errorCount,
-                errorRate: this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0,
-            },
-            apiClient: this.apiClient ? {
-                cacheStats: this.apiClient.getCacheStats(),
-                queueStats: this.apiClient.getQueueStats(),
-            } : null,
-        };
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify(health, null, 2),
-                },
-            ],
-        };
     }
     async connect(transport) {
         try {
