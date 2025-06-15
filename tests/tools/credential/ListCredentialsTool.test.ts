@@ -47,8 +47,7 @@ describe('ListCredentialsTool', () => {
         createdAt: '2024-01-04T00:00:00Z',
         updatedAt: '2024-01-12T00:00:00Z',
         nodesAccess: [{ nodeType: 'n8n-nodes-base.googleDrive' }],
-        tags: ['google'],
-        // No tags array
+        // No tags array - testing undefined tags
       },
     ],
   };
@@ -227,7 +226,7 @@ describe('ListCredentialsTool', () => {
       const result = await tool.execute(input, context);
       const response = JSON.parse(result.content[0].text);
 
-      // cred4 has no tags array but should still be included when filtering by tags
+      // cred1 has 'google' tag, cred4 has no tags array so should not match
       expect(response.total).toBe(1);
       expect(response.credentials[0].id).toBe('cred1');
     });
