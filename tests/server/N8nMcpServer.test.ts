@@ -128,11 +128,15 @@ describe('N8nMcpServer', () => {
       const response = await client.listTools();
       
       expect(response.tools).toBeDefined();
-      expect(response.tools.length).toBe(9);
+      expect(response.tools.length).toBe(15); // 9 original + 6 execution tools
       
       const toolNames = response.tools.map(tool => tool.name);
+      
+      // System tools
       expect(toolNames).toContain('server_health');
       expect(toolNames).toContain('test_connection');
+      
+      // Workflow tools
       expect(toolNames).toContain('workflow_list');
       expect(toolNames).toContain('workflow_create');
       expect(toolNames).toContain('workflow_get');
@@ -140,6 +144,14 @@ describe('N8nMcpServer', () => {
       expect(toolNames).toContain('workflow_delete');
       expect(toolNames).toContain('workflow_activate');
       expect(toolNames).toContain('workflow_deactivate');
+      
+      // Execution tools
+      expect(toolNames).toContain('trigger_execution');
+      expect(toolNames).toContain('get_execution');
+      expect(toolNames).toContain('list_executions');
+      expect(toolNames).toContain('stop_execution');
+      expect(toolNames).toContain('monitor_execution');
+      expect(toolNames).toContain('replay_execution');
     });
 
     it.skip('should track request counts', async () => {

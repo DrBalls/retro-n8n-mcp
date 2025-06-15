@@ -2,7 +2,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { ListToolsRequestSchema, CallToolRequestSchema, ErrorCode, McpError, } from '@modelcontextprotocol/sdk/types.js';
 import { N8nApiClient } from '../services/N8nApiClient.js';
 import { N8nApiError, N8nAuthenticationError, N8nConnectionError, N8nRateLimitError, } from '../utils/errors.js';
-import { ToolRegistry, ServerHealthTool, TestConnectionTool, ListWorkflowsTool, CreateWorkflowTool, GetWorkflowTool, UpdateWorkflowTool, DeleteWorkflowTool, ActivateWorkflowTool, DeactivateWorkflowTool, } from '../tools/index.js';
+import { ToolRegistry, ServerHealthTool, TestConnectionTool, ListWorkflowsTool, CreateWorkflowTool, GetWorkflowTool, UpdateWorkflowTool, DeleteWorkflowTool, ActivateWorkflowTool, DeactivateWorkflowTool, TriggerExecutionTool, GetExecutionTool, ListExecutionsTool, StopExecutionTool, MonitorExecutionTool, ReplayExecutionTool, } from '../tools/index.js';
 export class N8nMcpServer {
     server;
     apiClient = null;
@@ -53,7 +53,9 @@ export class N8nMcpServer {
         this.toolRegistry.register(new ServerHealthTool());
         // Register n8n tools if API client is available
         if (this.apiClient) {
+            // System tools
             this.toolRegistry.register(new TestConnectionTool());
+            // Workflow tools
             this.toolRegistry.register(new ListWorkflowsTool());
             this.toolRegistry.register(new CreateWorkflowTool());
             this.toolRegistry.register(new GetWorkflowTool());
@@ -61,6 +63,13 @@ export class N8nMcpServer {
             this.toolRegistry.register(new DeleteWorkflowTool());
             this.toolRegistry.register(new ActivateWorkflowTool());
             this.toolRegistry.register(new DeactivateWorkflowTool());
+            // Execution tools
+            this.toolRegistry.register(new TriggerExecutionTool());
+            this.toolRegistry.register(new GetExecutionTool());
+            this.toolRegistry.register(new ListExecutionsTool());
+            this.toolRegistry.register(new StopExecutionTool());
+            this.toolRegistry.register(new MonitorExecutionTool());
+            this.toolRegistry.register(new ReplayExecutionTool());
         }
         // Update tool registry context
         this.updateToolContext();
