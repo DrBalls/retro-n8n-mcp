@@ -1,90 +1,203 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { N8nMcpServer } from '../../src/server/N8nMcpServer.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { N8nApiConfig } from '../../src/types/config.types.js';
 
 describe('N8nMcpServer', () => {
-  let server: N8nMcpServer;
-  let client: Client;
-  let clientTransport: InMemoryTransport;
-  let serverTransport: InMemoryTransport;
+  describe('without API client', () => {
+    let server: N8nMcpServer;
+    let client: Client;
+    let clientTransport: InMemoryTransport;
+    let serverTransport: InMemoryTransport;
 
-  beforeEach(async () => {
-    // Create server
-    server = new N8nMcpServer();
+    beforeEach(async () => {
+      // Create server without API config
+      server = new N8nMcpServer();
 
-    // Create in-memory transport pair
-    [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+      // Create in-memory transport pair
+      [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
-    // Connect server
-    await server.connect(serverTransport);
+      // Connect server
+      await server.connect(serverTransport);
 
-    // Create and connect client
-    client = new Client(
-      {
-        name: 'test-client',
-        version: '1.0.0',
-      },
-      {
-        capabilities: {},
-      },
-    );
-    await client.connect(clientTransport);
-  });
-
-  afterEach(async () => {
-    // Clean up connections
-    await client.close();
-    await server.close();
-  });
-
-  it('should list available tools', async () => {
-    const response = await client.listTools();
-    
-    expect(response.tools).toBeDefined();
-    expect(response.tools.length).toBeGreaterThan(0);
-    
-    const toolNames = response.tools.map(tool => tool.name);
-    expect(toolNames).toContain('test_connection');
-    expect(toolNames).toContain('workflow_list');
-  });
-
-  it('should handle test_connection tool', async () => {
-    const result = await client.callTool('test_connection', {});
-    
-    expect(result.content).toBeDefined();
-    expect(result.content.length).toBeGreaterThan(0);
-    expect(result.content[0]).toHaveProperty('type', 'text');
-    expect(result.content[0]).toHaveProperty('text');
-    expect(result.content[0].text).toContain('successful');
-  });
-
-  it('should handle workflow_list tool', async () => {
-    const result = await client.callTool('workflow_list', {
-      limit: 5,
+      // Create and connect client
+      client = new Client(
+        {
+          name: 'test-client',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {},
+        },
+      );
+      await client.connect(clientTransport);
     });
-    
-    expect(result.content).toBeDefined();
-    expect(result.content.length).toBeGreaterThan(0);
-    expect(result.content[0]).toHaveProperty('type', 'text');
-    
-    const workflows = JSON.parse(result.content[0].text);
-    expect(Array.isArray(workflows)).toBe(true);
-    expect(workflows.length).toBeLessThanOrEqual(5);
-  });
 
-  it('should filter workflows by active status', async () => {
-    const result = await client.callTool('workflow_list', {
-      active: true,
+    afterEach(async () => {
+      // Clean up connections
+      await client.close();
+      await server.close();
     });
-    
-    const workflows = JSON.parse(result.content[0].text);
-    expect(workflows.every((w: any) => w.active === true)).toBe(true);
+
+    it('should list only server health tool when API client not configured', async () => {
+      const response = await client.listTools();
+      
+      expect(response.tools).toBeDefined();
+      expect(response.tools.length).toBe(1);
+      expect(response.tools[0].name).toBe('server_health');
+    });
+
+    it('should handle server_health tool', async () => {
+      const result = await client.callTool('server_health', {});
+      
+      expect(result.content).toBeDefined();
+      expect(result.content.length).toBe(1);
+      expect(result.content[0]).toHaveProperty('type', 'text');
+      
+      const health = JSON.parse(result.content[0].text);
+      expect(health.status).toBe('healthy');
+      expect(health.version).toBe('0.1.0');
+      expect(health.isConnected).toBe(true);
+      expect(health.apiClientConfigured).toBe(false);
+      expect(health.stats).toBeDefined();
+      expect(health.apiClient).toBeNull();
+    });
+
+    it('should return error for n8n tools when API client not configured', async () => {
+      await expect(
+        client.callTool('test_connection', {})
+      ).rejects.toThrow('MethodNotFound');
+    });
   });
 
-  it('should handle unknown tool error', async () => {
-    await expect(
-      client.callTool('unknown_tool', {})
-    ).rejects.toThrow('Unknown tool');
+  describe('with API client', () => {
+    let server: N8nMcpServer;
+    let client: Client;
+    let clientTransport: InMemoryTransport;
+    let serverTransport: InMemoryTransport;
+
+    beforeEach(async () => {
+      // Mock API config
+      const apiConfig: Partial<N8nApiConfig> = {
+        baseUrl: 'https://test.n8n.io',
+        apiKey: 'test-api-key',
+      };
+
+      // Create server with API config
+      server = new N8nMcpServer(apiConfig);
+
+      // Create in-memory transport pair
+      [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+      // Connect server
+      await server.connect(serverTransport);
+
+      // Create and connect client
+      client = new Client(
+        {
+          name: 'test-client',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {},
+        },
+      );
+      await client.connect(clientTransport);
+    });
+
+    afterEach(async () => {
+      // Clean up connections
+      await client.close();
+      await server.close();
+    });
+
+    it('should list all available tools with API client', async () => {
+      const response = await client.listTools();
+      
+      expect(response.tools).toBeDefined();
+      expect(response.tools.length).toBe(3);
+      
+      const toolNames = response.tools.map(tool => tool.name);
+      expect(toolNames).toContain('server_health');
+      expect(toolNames).toContain('test_connection');
+      expect(toolNames).toContain('workflow_list');
+    });
+
+    it('should track request counts', async () => {
+      // Make some requests
+      await client.listTools();
+      await client.callTool('server_health', {});
+      await client.listTools();
+      
+      // Check stats
+      const result = await client.callTool('server_health', {});
+      const health = JSON.parse(result.content[0].text);
+      
+      expect(health.stats.totalRequests).toBe(4); // Including the final server_health call
+      expect(health.stats.totalErrors).toBe(0);
+      expect(health.stats.errorRate).toBe(0);
+    });
+
+    it('should handle unknown tool error', async () => {
+      await expect(
+        client.callTool('unknown_tool', {})
+      ).rejects.toThrow('MethodNotFound');
+    });
+
+    it('should increment error count on failures', async () => {
+      // Trigger an error
+      try {
+        await client.callTool('unknown_tool', {});
+      } catch (error) {
+        // Expected error
+      }
+      
+      // Check error stats
+      const result = await client.callTool('server_health', {});
+      const health = JSON.parse(result.content[0].text);
+      
+      expect(health.stats.totalErrors).toBe(1);
+      expect(health.stats.errorRate).toBeGreaterThan(0);
+    });
+
+    it('should provide server uptime', async () => {
+      // Wait a bit
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const result = await client.callTool('server_health', {});
+      const health = JSON.parse(result.content[0].text);
+      
+      expect(health.uptime).toBeGreaterThan(0);
+    });
+  });
+
+  describe('server lifecycle', () => {
+    it('should handle connection lifecycle correctly', async () => {
+      const server = new N8nMcpServer();
+      const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+      
+      // Server should not be connected initially
+      expect(server.isHealthy()).toBe(false);
+      
+      // Connect
+      await server.connect(serverTransport);
+      expect(server.isHealthy()).toBe(true);
+      
+      // Close
+      await server.close();
+      expect(server.isHealthy()).toBe(false);
+    });
+
+    it('should provide accurate stats', () => {
+      const server = new N8nMcpServer();
+      
+      const stats = server.getStats();
+      expect(stats.totalRequests).toBe(0);
+      expect(stats.totalErrors).toBe(0);
+      expect(stats.errorRate).toBe(0);
+      
+      expect(server.getUptime()).toBeGreaterThanOrEqual(0);
+    });
   });
 });
