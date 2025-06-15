@@ -32,6 +32,15 @@ import {
   MonitorExecutionTool,
   ReplayExecutionTool,
 } from '../tools/index.js';
+import {
+  CreateCredentialTool,
+  UpdateCredentialTool,
+  DeleteCredentialTool,
+  ListCredentialsTool,
+  TestCredentialTool,
+  GetCredentialTool,
+} from '../tools/credential/index.js';
+import { Logger, LogLevel } from '../utils/Logger.js';
 
 export class N8nMcpServer {
   private server: Server;
@@ -112,6 +121,14 @@ export class N8nMcpServer {
       this.toolRegistry.register(new StopExecutionTool());
       this.toolRegistry.register(new MonitorExecutionTool());
       this.toolRegistry.register(new ReplayExecutionTool());
+      
+      // Credential tools
+      this.toolRegistry.register(new CreateCredentialTool());
+      this.toolRegistry.register(new UpdateCredentialTool());
+      this.toolRegistry.register(new DeleteCredentialTool());
+      this.toolRegistry.register(new ListCredentialsTool());
+      this.toolRegistry.register(new TestCredentialTool());
+      this.toolRegistry.register(new GetCredentialTool());
     }
 
     // Update tool registry context

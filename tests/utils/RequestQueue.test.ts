@@ -56,6 +56,11 @@ describe('RequestQueue', () => {
     const successFn = () => Promise.resolve('success');
     const failFn = () => Promise.reject(new Error('failed'));
     
+    // Add error handler to prevent unhandled rejection
+    queue.on('error', () => {
+      // Expected error, no action needed
+    });
+    
     const results = await Promise.allSettled([
       queue.add(successFn),
       queue.add(failFn),
