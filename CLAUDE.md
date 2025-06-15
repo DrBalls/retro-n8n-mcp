@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.2 (January 15, 2025)
+## 📋 PROTOCOL VERSION: v1.3 (January 15, 2025)
 
 ### Protocol Changelog:
+- **v1.3** (January 15, 2025): TaskMaster clarifications and security implementation
+  - Added: TaskMaster best practices section
+  - Added: Security layer implementation patterns
+  - Clarified: TaskMaster file parameter usage
+  - Clarified: WSL2 environment is working correctly
 - **v1.2** (January 15, 2025): Enhanced status reporting and pattern documentation
   - Added: Quick project metrics (tool count, test status) in initial report
   - Added: TaskMaster configuration verification step
@@ -379,6 +384,23 @@ mcp__taskmaster-ai__update_task --id X --prompt "progress notes" --projectRoot /
 - **Documentation**: `/docs/`
 - **This File**: `/CLAUDE.md`
 
+## 📝 TASKMASTER BEST PRACTICES
+
+### TaskMaster Tool Usage
+1. **Always include projectRoot**: `--projectRoot /home/wes/retro-n8n-mcp`
+2. **Specify file when needed**: `--file tasks/tasks.json` (if default location fails)
+3. **Two task file locations exist**:
+   - `.taskmaster/tasks/tasks.json` (TaskMaster default)
+   - `tasks/tasks.json` (project root)
+4. **Manual JSON editing is acceptable**: For bulk updates, directly editing JSON files is often faster
+5. **TaskMaster is working correctly**: Initial "errors" are often just verbose logging or missing parameters
+
+### Common TaskMaster Issues and Solutions
+- **"Cannot find tasks"**: Add `--file tasks/tasks.json` parameter
+- **"Task not found"**: Ensure using correct task ID and file location
+- **Bulk updates failing**: Consider manual JSON editing instead
+- **WSL2 concerns**: The environment works perfectly - no path or permission issues
+
 ## 🔨 COMMON IMPLEMENTATION PATTERNS
 
 ### MCP Tool Implementation Pattern
@@ -435,6 +457,35 @@ export class MyNewTool extends BaseTool {
 }
 ```
 
+### Security Layer Pattern
+The security layer follows a modular design:
+
+```typescript
+// 1. ApiKeyManager - Manages API key lifecycle
+const apiKey = apiKeyManager.generateApiKey(name, permissions, expiresIn);
+const validation = apiKeyManager.validateApiKey(key);
+
+// 2. Authorization - RBAC with permission wildcards
+const allowed = authorization.hasPermission(context, 'workflow.create');
+// Supports wildcards: 'workflow.*', '*.read', '*'
+
+// 3. AuditLogger - Tracks all security events
+auditLogger.logSuccess(action, context);
+auditLogger.logDenied(action, reason, context);
+const suspicious = auditLogger.detectSuspiciousActivity();
+
+// 4. RateLimiter - Multi-tier rate limiting
+const result = rateLimiter.checkLimit(name, key, { cost: 1 });
+// Supports: global, per-user, per-apiKey, per-tool limits
+
+// 5. SecurityManager - Orchestrates all components
+const securityCheck = await securityManager.checkToolSecurity(
+  toolName,
+  permission,
+  context
+);
+```
+
 ### Registering New Tools
 1. Create the tool file in appropriate directory (e.g., `src/tools/execution/`)
 2. Export it from the directory's `index.ts`
@@ -453,6 +504,12 @@ export class MyNewTool extends BaseTool {
 - **Solution**: Check existing tools in same category for patterns
 - **Response Format**: Use `{ content: [{ type: 'text', text: '...', mimeType?: '...' }] }`
 - **Metadata**: Always include return type: `getMetadata(): IToolMetadata`
+
+### Audit Event Structure
+- **Issue**: Tests expecting 'status' property on audit events
+- **Solution**: Use 'result' property instead (values: 'success', 'failure', 'denied')
+- **Query Pattern**: `logs.filter(l => l.result === 'success')`
+- **Action Filtering**: `logs.filter(l => l.action.startsWith('authorize:'))`
 
 ### TaskMaster Integration
 - **Issue**: TaskMaster not finding tasks despite file existing
