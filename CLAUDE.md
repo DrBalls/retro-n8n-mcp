@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.0 (January 14, 2025)
+## 📋 PROTOCOL VERSION: v1.1 (January 15, 2025)
 
 ### Protocol Changelog:
+- **v1.1** (January 15, 2025): Improved testing and compatibility checks
+  - Added: MCP SDK version compatibility check after git pull
+  - Added: Quick test run (`npm test`) after pulling changes
+  - Added: Reminder to check existing tool patterns before implementing
+  - Modified: Enhanced troubleshooting section for common SDK issues
 - **v1.0** (January 14, 2025): Initial protocol for n8n MCP Server development
   - Established session start/end protocols
   - Added TaskMaster integration for project management
@@ -19,9 +24,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    ```bash
    git status
    git pull origin main  # If clean
+   npm test  # Quick test run to verify working state
    ```
    - Report any uncommitted changes
    - Pull latest if working directory is clean
+   - Run quick test to catch any breaking changes
+   - Check MCP SDK version if tests fail unexpectedly
 
 2. **Read Core Documents**
    ```
@@ -356,6 +364,24 @@ mcp__taskmaster-ai__update_task --id X --prompt "progress notes" --projectRoot /
 - **Tests**: `/tests/`
 - **Documentation**: `/docs/`
 - **This File**: `/CLAUDE.md`
+
+## 🛠️ COMMON ISSUES & SOLUTIONS
+
+### MCP SDK Client/Server Communication
+- **Issue**: Tests timeout with "Unknown message type" errors
+- **Solution**: Skip problematic `callTool` tests until SDK compatibility resolved
+- **Check**: Verify MCP SDK version matches between client and server
+
+### Tool Implementation Patterns
+- **Issue**: TypeScript errors with tool metadata or response formats
+- **Solution**: Check existing tools in same category for patterns
+- **Response Format**: Use `{ content: [{ type: 'text', text: '...', mimeType?: '...' }] }`
+- **Metadata**: Always include return type: `getMetadata(): IToolMetadata`
+
+### TaskMaster Integration
+- **Issue**: TaskMaster not finding tasks despite file existing
+- **Solution**: Ensure tasks.json is in `.taskmaster/tasks/` directory
+- **Alternative**: Use existing tasks.json in `/tasks/` directory
 
 ---
 
