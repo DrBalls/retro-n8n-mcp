@@ -5,11 +5,14 @@ import {
   CallToolRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
+import { N8nApiClient } from '../services/N8nApiClient.js';
+import { N8nApiConfig } from '../types/config.types.js';
 
 export class N8nMcpServer {
   private server: Server;
+  private apiClient: N8nApiClient | null = null;
 
-  constructor() {
+  constructor(apiConfig?: Partial<N8nApiConfig>) {
     this.server = new Server(
       {
         name: 'n8n-mcp-server',
@@ -22,6 +25,11 @@ export class N8nMcpServer {
         },
       },
     );
+
+    // Initialize API client if config provided
+    if (apiConfig?.baseUrl && apiConfig?.apiKey) {
+      this.apiClient = new N8nApiClient(apiConfig);
+    }
 
     this.setupHandlers();
   }
@@ -84,13 +92,25 @@ export class N8nMcpServer {
 
   private async handleTestConnection(): Promise<{ content: Array<{ type: string; text: string }> }> {
     try {
-      // For now, just return a success message
-      // In the future, this will actually test the n8n API connection
+      if (!this.apiClient) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'n8n API client not configured. Please set N8N_API_URL and N8N_API_KEY environment variables.',
+            },
+          ],
+        };
+      }
+
+      const result = await this.apiClient.testConnection();
       return {
         content: [
           {
             type: 'text',
-            text: 'Connection test successful! n8n MCP server is running.',
+            text: result.connected 
+              ? 'Connection test successful! Connected to n8n instance.' 
+              : 'Connection test failed. Please check your configuration.',
           },
         ],
       };
@@ -108,32 +128,49 @@ export class N8nMcpServer {
 
   private async handleWorkflowList(args: unknown): Promise<{ content: Array<{ type: string; text: string }> }> {
     try {
+      if (!this.apiClient) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'n8n API client not configured. Please set N8N_API_URL and N8N_API_KEY environment variables.',
+            },
+          ],
+        };
+      }
+
       // Validate arguments
       const schema = z.object({
         active: z.boolean().optional(),
         limit: z.number().min(1).max(100).default(10),
+        tags: z.array(z.string()).optional(),
       });
 
-      const { active, limit } = schema.parse(args || {});
+      const { active, limit, tags } = schema.parse(args || {});
 
-      // For now, return a mock response
-      // In the future, this will call the n8n API
-      const mockWorkflows = [
-        { id: '1', name: 'Sample Workflow 1', active: true },
-        { id: '2', name: 'Sample Workflow 2', active: false },
-      ];
+      // Call n8n API
+      const response = await this.apiClient.getWorkflows({
+        ...(active !== undefined && { active }),
+        limit,
+        ...(tags && { tags }),
+      });
 
-      const filtered = active !== undefined 
-        ? mockWorkflows.filter(w => w.active === active)
-        : mockWorkflows;
-
-      const limited = filtered.slice(0, limit);
+      // Format response
+      const workflows = response.data.map(workflow => ({
+        id: workflow.id,
+        name: workflow.name,
+        active: workflow.active,
+        tags: workflow.tags,
+        createdAt: workflow.createdAt,
+        updatedAt: workflow.updatedAt,
+        nodeCount: workflow.nodes.length,
+      }));
 
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(limited, null, 2),
+            text: JSON.stringify(workflows, null, 2),
           },
         ],
       };

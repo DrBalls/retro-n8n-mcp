@@ -1,6 +1,8 @@
+import { N8nApiConfig } from '../types/config.types.js';
 export declare class N8nMcpServer {
     private server;
-    constructor();
+    private apiClient;
+    constructor(apiConfig?: Partial<N8nApiConfig>);
     private setupHandlers;
     private getAvailableTools;
     private handleTestConnection;

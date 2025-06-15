@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { N8nMcpServer } from './server/N8nMcpServer.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { getN8nConfigFromEnv } from './types/config.types.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -8,8 +9,11 @@ dotenv.config();
 
 async function main(): Promise<void> {
   try {
-    // Create server instance
-    const server = new N8nMcpServer();
+    // Get configuration from environment
+    const config = getN8nConfigFromEnv();
+    
+    // Create server instance with config
+    const server = new N8nMcpServer(config);
 
     // Create stdio transport
     const transport = new StdioServerTransport();
