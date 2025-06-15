@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.1 (January 15, 2025)
+## 📋 PROTOCOL VERSION: v1.2 (January 15, 2025)
 
 ### Protocol Changelog:
+- **v1.2** (January 15, 2025): Enhanced status reporting and pattern documentation
+  - Added: Quick project metrics (tool count, test status) in initial report
+  - Added: TaskMaster configuration verification step
+  - Added: Common implementation patterns section
+  - Modified: Initial status report to include more actionable information
 - **v1.1** (January 15, 2025): Improved testing and compatibility checks
   - Added: MCP SDK version compatibility check after git pull
   - Added: Quick test run (`npm test`) after pulling changes
@@ -31,7 +36,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Run quick test to catch any breaking changes
    - Check MCP SDK version if tests fail unexpectedly
 
-2. **Read Core Documents**
+2. **Verify TaskMaster Configuration**
+   ```bash
+   # Check if TaskMaster is properly initialized
+   ls -la .taskmaster/tasks/
+   # If tasks.json exists but TaskMaster can't find tasks, verify structure
+   ```
+
+3. **Read Core Documents**
    ```
    1. Read this CLAUDE.md file for protocol updates
    2. Check TaskMaster: mcp__taskmaster-ai__get_tasks for current task list
@@ -39,16 +51,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    4. Review any existing code/documentation relevant to session goals
    ```
 
-3. **Report Initial Status**
+4. **Report Initial Status with Metrics**
    ```
    "Session Status:
    - Git: [Clean/Has changes]
+   - Tests: [X passing, Y failing] (from npm test)
+   - Tools: [N total] ([breakdown by category])
    - Current Tasks: [X pending, Y in-progress, Z completed]
    - Next Priority: [Task #N - Title]
    - Session Goal: [What we'll focus on today]"
    ```
 
-4. **Create Session Plan**
+5. **Create Session Plan**
    - Use TaskMaster to identify tasks for this session
    - Create TodoWrite list for micro-tasks within the session
    - Confirm priorities with user before starting
@@ -364,6 +378,68 @@ mcp__taskmaster-ai__update_task --id X --prompt "progress notes" --projectRoot /
 - **Tests**: `/tests/`
 - **Documentation**: `/docs/`
 - **This File**: `/CLAUDE.md`
+
+## 🔨 COMMON IMPLEMENTATION PATTERNS
+
+### MCP Tool Implementation Pattern
+All tools in this project follow a consistent pattern:
+
+```typescript
+import { z } from 'zod';
+import { BaseTool, IToolContext, IToolResponse, IToolMetadata } from '../base/Tool.js';
+
+export class MyNewTool extends BaseTool {
+  name = 'tool_name';
+  description = 'What this tool does';
+  
+  inputSchema = z.object({
+    // Define input parameters with Zod
+  });
+
+  async execute(params: unknown, context: IToolContext): Promise<IToolResponse> {
+    const input = this.validateInput<z.infer<typeof this.inputSchema>>(params);
+    
+    if (!context.apiClient) {
+      throw new Error('n8n API client not configured');
+    }
+
+    try {
+      // Tool implementation using context.apiClient.request()
+      const response = await context.apiClient.request(
+        'METHOD',
+        '/endpoint',
+        { data: {}, params: {} }
+      );
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+          mimeType: 'application/json'
+        }]
+      };
+    } catch (error) {
+      // Handle errors appropriately
+      throw error;
+    }
+  }
+
+  getMetadata(): IToolMetadata {
+    return {
+      category: 'workflow' | 'execution' | 'credential' | 'system' | 'utility',
+      isMutating: true/false,
+      requirements: ['n8n API access'],
+      tags: ['relevant', 'tags']
+    };
+  }
+}
+```
+
+### Registering New Tools
+1. Create the tool file in appropriate directory (e.g., `src/tools/execution/`)
+2. Export it from the directory's `index.ts`
+3. Import in `src/server/N8nMcpServer.ts`
+4. Register in `registerTools()` method without constructor parameters
 
 ## 🛠️ COMMON ISSUES & SOLUTIONS
 
