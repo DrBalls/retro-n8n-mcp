@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { Tool as McpTool } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from '../../utils/zodToJsonSchema.js';
+import { ErrorHandler, IErrorContext } from '../../utils/ErrorHandler.js';
+import { ErrorDiagnostics } from '../../utils/ErrorDiagnostics.js';
+import { N8nValidationError } from '../../utils/errors.js';
 
 /**
  * Base interface for all n8n MCP tools
@@ -144,10 +147,25 @@ export abstract class BaseTool implements ITool {
   }
 
   /**
-   * Validate input parameters
+   * Validate input parameters with enhanced error handling
    */
   protected validateInput<T>(params: unknown): T {
-    return this.inputSchema.parse(params) as T;
+    try {
+      return this.inputSchema.parse(params) as T;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const validationError = new N8nValidationError(
+          'Input validation failed',
+          error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message,
+            code: e.code
+          }))
+        );
+        throw validationError;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -161,15 +179,58 @@ export abstract class BaseTool implements ITool {
   }
 
   /**
-   * Create an error response
+   * Create an error response with diagnostics
    */
   protected createErrorResponse(error: string | Error, metadata?: Record<string, unknown>): IToolResponse {
-    const errorMessage = error instanceof Error ? error.message : error;
-    return {
-      content: [{ type: 'text', text: `Error: ${errorMessage}` }],
-      isError: true,
-      ...(metadata && { metadata }),
+    const errorObj = error instanceof Error ? error : new Error(error);
+    const diagnosis = ErrorDiagnostics.diagnose(errorObj);
+    
+    const errorInfo = {
+      error: errorObj.message,
+      diagnosis: {
+        type: diagnosis.errorType,
+        cause: diagnosis.probableCause,
+        fixes: diagnosis.suggestedFixes,
+        confidence: diagnosis.confidence
+      },
+      ...(metadata || {})
     };
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(errorInfo, null, 2),
+        mimeType: 'application/json'
+      }],
+      isError: true,
+      metadata: errorInfo
+    };
+  }
+
+  /**
+   * Execute with error handling and recovery
+   */
+  protected async executeWithErrorHandling<T>(
+    operation: () => Promise<T>,
+    context: IErrorContext
+  ): Promise<T> {
+    try {
+      return await ErrorHandler.retry(operation, {
+        ...context,
+        tool: this.name
+      });
+    } catch (error) {
+      const diagnosis = ErrorDiagnostics.diagnose(error);
+      
+      // Log diagnostic information
+      console.error(`Tool ${this.name} error:`, {
+        error: error instanceof Error ? error.message : error,
+        diagnosis: diagnosis,
+        context: context
+      });
+
+      throw error;
+    }
   }
 
   /**

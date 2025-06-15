@@ -9,6 +9,7 @@ import {
   N8nTimeoutError,
   isRetryableError,
 } from '../utils/errors.js';
+import { ErrorHandler } from '../utils/ErrorHandler.js';
 import {
   N8nApiConfig,
   N8nApiConfigSchema,
@@ -131,28 +132,15 @@ export class N8nApiClient {
     retries = this.config.retry.maxRetries,
     delay = this.config.retry.initialDelay,
   ): Promise<T> {
-    try {
-      return await fn();
-    } catch (error) {
-      if (retries === 0 || !isRetryableError(error)) {
-        throw error;
-      }
-      
-      // Calculate next delay with exponential backoff
-      const nextDelay = Math.min(
-        delay * this.config.retry.backoffMultiplier,
-        this.config.retry.maxDelay,
-      );
-      
-      // If rate limited, use the retry-after header
-      if (error instanceof N8nRateLimitError && error.retryAfter) {
-        await new Promise(resolve => setTimeout(resolve, error.retryAfter));
-      } else {
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-      
-      return this.executeWithRetry(fn, retries - 1, nextDelay);
-    }
+    return ErrorHandler.retry(
+      fn,
+      {
+        operation: 'n8nApiRequest',
+        resourceType: 'api',
+        maxAttempts: retries + 1
+      },
+      retries + 1
+    );
   }
 
   private getCacheKey(method: string, path: string, params?: unknown): string {
