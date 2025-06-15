@@ -5,6 +5,5 @@ export * from './ToolRegistry.js';
 export * from './system/ServerHealthTool.js';
 export * from './system/TestConnectionTool.js';
 // Workflow tools
-export * from './workflow/ListWorkflowsTool.js';
-export * from './workflow/CreateWorkflowTool.js';
+export * from './workflow/index.js';
 //# sourceMappingURL=index.js.map

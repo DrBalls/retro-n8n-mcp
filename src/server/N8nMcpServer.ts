@@ -20,6 +20,11 @@ import {
   TestConnectionTool,
   ListWorkflowsTool,
   CreateWorkflowTool,
+  GetWorkflowTool,
+  UpdateWorkflowTool,
+  DeleteWorkflowTool,
+  ActivateWorkflowTool,
+  DeactivateWorkflowTool,
 } from '../tools/index.js';
 
 export class N8nMcpServer {
@@ -85,6 +90,11 @@ export class N8nMcpServer {
       this.toolRegistry.register(new TestConnectionTool());
       this.toolRegistry.register(new ListWorkflowsTool());
       this.toolRegistry.register(new CreateWorkflowTool());
+      this.toolRegistry.register(new GetWorkflowTool());
+      this.toolRegistry.register(new UpdateWorkflowTool());
+      this.toolRegistry.register(new DeleteWorkflowTool());
+      this.toolRegistry.register(new ActivateWorkflowTool());
+      this.toolRegistry.register(new DeactivateWorkflowTool());
     }
 
     // Update tool registry context
@@ -136,6 +146,8 @@ export class N8nMcpServer {
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       this.requestCount++;
+      this.log('debug', `Raw tool call request:`, request);
+      
       const { name, arguments: args } = request.params;
       this.log('debug', `Handling tool call: ${name}`, args);
 
@@ -265,6 +277,10 @@ export class N8nMcpServer {
   }
 
   isHealthy(): boolean {
-    return this.isConnected && this.errorCount < this.requestCount * 0.5;
+    // Server is healthy if connected and error rate is below 50%
+    // When no requests have been made, consider it healthy if connected
+    if (!this.isConnected) return false;
+    if (this.requestCount === 0) return true;
+    return this.errorCount < this.requestCount * 0.5;
   }
 }
