@@ -63,22 +63,23 @@ describe('Authorization', () => {
       authorization.createRole({ id: 'role2', name: 'Role 2', permissions: ['b'] });
 
       const roles = authorization.listRoles();
-      expect(roles).toHaveLength(2);
-      expect(roles.map(r => r.id)).toEqual(['role1', 'role2']);
+      // Should have 4 default roles + 2 new roles = 6 total
+      expect(roles).toHaveLength(6);
+      const roleIds = roles.map(r => r.id);
+      expect(roleIds).toContain('role1');
+      expect(roleIds).toContain('role2');
+      expect(roleIds).toContain('admin');
+      expect(roleIds).toContain('editor');
+      expect(roleIds).toContain('viewer');
+      expect(roleIds).toContain('executor');
     });
   });
 
   describe('User Management', () => {
     beforeEach(() => {
-      // Create test roles
-      authorization.createRole({
-        id: 'admin',
-        name: 'Administrator',
-        permissions: ['*']
-      });
-      authorization.createRole({
-        id: 'editor',
-        name: 'Editor',
+      // The default roles are already created in constructor
+      // Update the editor role to match test expectations
+      authorization.updateRole('editor', {
         permissions: ['workflow.*', 'execution.read']
       });
     });
@@ -150,20 +151,14 @@ describe('Authorization', () => {
 
   describe('Permission Checking', () => {
     beforeEach(() => {
-      // Create test roles
-      authorization.createRole({
-        id: 'admin',
-        name: 'Administrator',
-        permissions: ['*']
-      });
-      authorization.createRole({
-        id: 'editor',
-        name: 'Editor',
+      // The default roles are already created in constructor
+      // Update the editor role to match test expectations
+      authorization.updateRole('editor', {
         permissions: ['workflow.*', 'execution.read']
       });
-      authorization.createRole({
-        id: 'viewer',
-        name: 'Viewer',
+      
+      // Update viewer role to match test expectations
+      authorization.updateRole('viewer', {
         permissions: ['*.read']
       });
 

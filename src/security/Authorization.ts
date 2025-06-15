@@ -392,4 +392,132 @@ export class Authorization {
 
     return Array.from(permissions);
   }
+
+  /**
+   * List all roles
+   */
+  listRoles(): IRole[] {
+    return Array.from(this.roles.values());
+  }
+
+  /**
+   * Get a user by ID
+   */
+  getUser(id: string): IUser | undefined {
+    return this.users.get(id);
+  }
+
+  /**
+   * Assign a role to a user
+   */
+  assignRole(userId: string, roleId: string): boolean {
+    const user = this.users.get(userId);
+    if (!user) {
+      return false;
+    }
+
+    if (!this.roles.has(roleId)) {
+      return false;
+    }
+
+    if (!user.roles.includes(roleId)) {
+      user.roles.push(roleId);
+      this.logger.info(`Role assigned to user`, { userId, roleId });
+    }
+
+    return true;
+  }
+
+  /**
+   * Remove a role from a user
+   */
+  removeRole(userId: string, roleId: string): boolean {
+    const user = this.users.get(userId);
+    if (!user) {
+      return false;
+    }
+
+    const index = user.roles.indexOf(roleId);
+    if (index > -1) {
+      user.roles.splice(index, 1);
+      this.logger.info(`Role removed from user`, { userId, roleId });
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a permission matches a pattern (with wildcard support)
+   */
+  permissionMatches(pattern: string, permission: string): boolean {
+    // Exact match
+    if (pattern === permission) {
+      return true;
+    }
+
+    // Superuser wildcard
+    if (pattern === '*') {
+      return true;
+    }
+
+    // Check wildcard patterns
+    if (pattern.includes('*')) {
+      const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      return regex.test(permission);
+    }
+
+    return false;
+  }
+
+  /**
+   * Can access resource with advanced checks
+   */
+  canAccessResource(
+    context: {
+      user?: IUser;
+      resource?: {
+        type: string;
+        id: string;
+        ownerId?: string;
+        sharedWith?: string[];
+        isPublic?: boolean;
+      };
+    },
+    action: string
+  ): boolean {
+    if (!context.resource || !context.user) {
+      return false;
+    }
+
+    const resource = context.resource;
+    const user = context.user;
+
+    // Check if user is owner
+    if (resource.ownerId === user.id) {
+      // Owner has full access to their resources if they have ownership permission
+      const ownerPermission = `${resource.type}.*:owned`;
+      const rolePerms = this.getUserRolePermissions(user);
+      if (this.checkPermissionList(rolePerms, ownerPermission)) {
+        return true;
+      }
+    }
+
+    // Check if resource is shared with user
+    if (resource.sharedWith?.includes(user.id)) {
+      // Shared resources typically allow read access
+      if (action === 'read') {
+        return true;
+      }
+    }
+
+    // Check if resource is public
+    if (resource.isPublic && action === 'read') {
+      return true;
+    }
+
+    // Fall back to general permission check
+    const permission = `${resource.type}.${action}`;
+    return this.hasPermission({ user }, permission);
+  }
 }

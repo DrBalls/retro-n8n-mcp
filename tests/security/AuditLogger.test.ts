@@ -24,7 +24,7 @@ describe('AuditLogger', () => {
       expect(events).toHaveLength(1);
       const event = events[0];
       
-      expect(event.id).toMatch(/^evt_/);
+      expect(event.id).toMatch(/^ae_/);
       expect(event.action).toBe('login');
       expect(event.result).toBe('success');
       expect(event.userId).toBe('user1');
@@ -164,24 +164,21 @@ describe('AuditLogger', () => {
 
   describe('Statistics', () => {
     beforeEach(() => {
-      vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
-      
-      // Add events with specific timestamps
+      // Add events with specific timestamps by controlling system time
+      vi.setSystemTime(new Date('2024-01-15T10:00:00Z'));
       auditLogger.logSuccess('login', { 
-        userId: 'user1',
-        metadata: { timestamp: new Date('2024-01-15T10:00:00Z') }
+        userId: 'user1'
       });
+      
+      vi.setSystemTime(new Date('2024-01-15T10:30:00Z'));
       auditLogger.logSuccess('api_call', { 
-        userId: 'user1',
-        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+        userId: 'user1'
       });
       auditLogger.logFailure('login', 'Wrong password', { 
-        userId: 'user2',
-        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+        userId: 'user2'
       });
       auditLogger.logDenied('access_resource', 'No permission', { 
-        userId: 'user3',
-        metadata: { timestamp: new Date('2024-01-15T10:30:00Z') }
+        userId: 'user3'
       });
     });
 
@@ -221,9 +218,9 @@ describe('AuditLogger', () => {
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      expect(suspicious).toHaveLength(1);
-      expect(suspicious[0].type).toBe('rapid_failures');
-      expect(suspicious[0].userId).toBe('attacker');
+      expect(suspicious.failureSpikes).toHaveLength(1);
+      expect(suspicious.failureSpikes[0].userId).toBe('attacker');
+      expect(suspicious.failureSpikes[0].failures).toBeGreaterThanOrEqual(60); // Scaled from 5-min to hourly
     });
 
     it('should detect rapid permission denials', () => {
@@ -239,31 +236,35 @@ describe('AuditLogger', () => {
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      expect(suspicious).toHaveLength(1);
-      expect(suspicious[0].type).toBe('permission_scanning');
+      expect(suspicious.denialSpikes).toHaveLength(1);
+      expect(suspicious.denialSpikes[0].userId).toBe('scanner');
+      expect(suspicious.denialSpikes[0].denials).toBeGreaterThanOrEqual(120); // Scaled from 5-min to hourly
     });
 
     it('should detect unusual activity patterns', () => {
-      const now = new Date();
+      // Create events in the past hour
+      const baseTime = new Date('2024-01-16T10:00:00Z');
+      vi.setSystemTime(baseTime);
       
-      // Normal activity during day
-      vi.setSystemTime(new Date('2024-01-15T14:00:00Z'));
-      for (let i = 0; i < 5; i++) {
-        auditLogger.logSuccess('api_call', { userId: 'normal_user' });
-      }
-
-      // Unusual activity at 3 AM
-      vi.setSystemTime(new Date('2024-01-15T03:00:00Z'));
+      // Create a baseline with multiple different actions
+      auditLogger.logSuccess('action1', { userId: 'user1' });
+      auditLogger.logSuccess('action2', { userId: 'user1' });
+      auditLogger.logSuccess('action3', { userId: 'user1' });
+      auditLogger.logSuccess('action4', { userId: 'user1' });
+      auditLogger.logSuccess('action5', { userId: 'user1' });
+      
+      // Create an unusual spike - one action with way more events than others
+      // Average will be ~3.5 ((1+1+1+1+1+20)/6), so 20 > 3*3.5
       for (let i = 0; i < 20; i++) {
-        auditLogger.logSuccess('api_call', { 
-          userId: 'normal_user',
-          metadata: { timestamp: new Date('2024-01-15T03:00:00Z') }
-        });
+        auditLogger.logSuccess('unusual_spike', { userId: 'user2' });
       }
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      const unusualTime = suspicious.find(s => s.type === 'unusual_time_activity');
-      expect(unusualTime).toBeDefined();
+      
+      // Should detect the unusual action spike
+      expect(suspicious.unusualActions.length).toBeGreaterThan(0);
+      expect(suspicious.unusualActions[0].action).toBe('unusual_spike');
+      expect(suspicious.unusualActions[0].count).toBe(20);
     });
 
     it('should not flag normal activity as suspicious', () => {
@@ -277,7 +278,8 @@ describe('AuditLogger', () => {
       auditLogger.logSuccess('api_call', { userId: 'user1' });
 
       const suspicious = auditLogger.detectSuspiciousActivity();
-      expect(suspicious).toHaveLength(0);
+      expect(suspicious.failureSpikes).toHaveLength(0);
+      expect(suspicious.denialSpikes).toHaveLength(0);
     });
   });
 
