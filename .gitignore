@@ -1,34 +1,35 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dev-debug.log
-
-# Dependency directories
+# Dependencies
 node_modules/
 
-# Environment variables
+# Environment
 .env
+.env.local
+.env.*.local
 
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Logs
+logs/
+*.log
+npm-debug.log*
 
-# OS specific
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# OS files
 .DS_Store
+Thumbs.db
 
-# Task files
-tasks.json
-tasks/
+# IDE
+.vscode/
+.idea/
 
-# Test coverage
-coverage/
-.nyc_output/
-*.lcov 
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Build artifacts (if rebuilding)
+dist/
+*.tsbuildinfo
