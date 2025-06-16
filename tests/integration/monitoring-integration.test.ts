@@ -24,6 +24,8 @@ describe('Monitoring Integration', () => {
           close: vi.fn(),
         }),
       },
+      start: vi.fn().mockResolvedValue(undefined),
+      close: vi.fn().mockResolvedValue(undefined),
     };
   });
 

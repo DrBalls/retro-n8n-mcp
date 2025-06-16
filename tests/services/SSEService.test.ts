@@ -45,6 +45,14 @@ class MockEventSource extends EventEmitter {
 // Make EventSource available globally for tests
 (global as any).EventSource = MockEventSource;
 
+// Mock the require for eventsource polyfill
+vi.doMock('eventsource', () => MockEventSource);
+
+// Also set it on global for the getEventSource method
+(global as any).window = {
+  EventSource: MockEventSource
+};
+
 describe('SSEService', () => {
   let service: SSEService;
   let mockEventSource: MockEventSource;
