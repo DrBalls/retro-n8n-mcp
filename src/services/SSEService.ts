@@ -19,7 +19,7 @@ export interface ISSEMessage {
 
 export class SSEService extends EventEmitter {
   private eventSource: EventSource | null = null;
-  private options: Required<ISSEOptions>;
+  private options: Required<Omit<ISSEOptions, 'authToken'>> & { authToken?: string };
   private reconnectAttempts = 0;
   private isConnecting = false;
   private reconnectTimer?: NodeJS.Timeout;
