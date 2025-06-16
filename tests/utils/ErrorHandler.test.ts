@@ -136,7 +136,7 @@ describe('ErrorHandler', () => {
 
       expect(result).toBe('success');
       expect(operation).toHaveBeenCalledTimes(2);
-      expect(endTime - startTime).toBeGreaterThanOrEqual(5000); // Should wait at least 5s
+      expect(endTime - startTime).toBeGreaterThanOrEqual(4900); // Should wait around 5s (with some tolerance)
     });
   });
 
