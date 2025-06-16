@@ -125,9 +125,28 @@ The server follows a modular architecture:
 
 ## Documentation
 
-- [Version Control Guide](docs/version-control-guide.md) - Comprehensive guide to Git-like version control for workflows
+### Getting Started
+- [Getting Started Guide](docs/getting-started.md) - Quick start guide for new users
+- [Tool Reference](docs/tool-reference.md) - Complete reference for all 60+ tools
+
+### API Documentation
+- [TypeScript API Reference](docs/api/README.md) - Auto-generated API documentation
+- [Architecture Overview](docs/architecture.md) - System architecture and design decisions
+- [Module Reference](docs/api/modules.md) - Detailed module documentation
+
+### Feature Guides
+- [Version Control Guide](docs/version-control-guide.md) - Comprehensive guide to Git-like version control
 - [Version Control Quick Reference](docs/version-control-quick-reference.md) - Quick command reference
-- [Workflow Patterns](docs/version-control-workflow-patterns.md) - Common development patterns and best practices
+- [Workflow Patterns](docs/version-control-workflow-patterns.md) - Common development patterns
+
+### Advanced Topics
+- [Test Coverage Plan](docs/test-coverage-plan.md) - Testing strategy and coverage goals
+- [Troubleshooting Guide](docs/troubleshooting.md) - Common issues and solutions
+
+### Examples
+- [Interactive Examples](examples/) - Ready-to-run code examples
+- [Hello World](examples/hello-world.ts) - Your first n8n workflow
+- [Version Control Demo](examples/version-control-basics.ts) - Learn version control
 
 ## Contributing
 
