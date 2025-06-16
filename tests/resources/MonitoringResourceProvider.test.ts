@@ -10,7 +10,12 @@ describe('MonitoringResourceProvider', () => {
 
   beforeEach(() => {
     mockApiClient = {
-      request: vi.fn()
+      request: vi.fn(),
+      getWorkflows: vi.fn(),
+      getExecutions: vi.fn(),
+      getWorkflow: vi.fn(),
+      getExecution: vi.fn(),
+      testConnection: vi.fn()
     };
 
     mockMonitoringService = {
@@ -46,23 +51,21 @@ describe('MonitoringResourceProvider', () => {
   describe('listResources', () => {
     it('should list static and dynamic resources', async () => {
       // Mock API responses
-      mockApiClient.request
-        .mockImplementationOnce((method: string, path: string) => {
-          if (path === '/workflows') {
-            return Promise.resolve([
-              { id: 'wf-1', name: 'Workflow 1', active: true },
-              { id: 'wf-2', name: 'Workflow 2', active: true }
-            ]);
-          }
-        })
-        .mockImplementationOnce((method: string, path: string) => {
-          if (path === '/executions') {
-            return Promise.resolve([
-              { id: 'exec-1', workflowId: 'wf-1', status: 'running', workflowData: { name: 'Workflow 1' } },
-              { id: 'exec-2', workflowId: 'wf-2', status: 'running', workflowData: { name: 'Workflow 2' } }
-            ]);
-          }
-        });
+      mockApiClient.getWorkflows.mockResolvedValue({
+        data: [
+          { id: 'wf-1', name: 'Workflow 1', active: true },
+          { id: 'wf-2', name: 'Workflow 2', active: true }
+        ],
+        count: 2
+      });
+
+      mockApiClient.getExecutions.mockResolvedValue({
+        data: [
+          { id: 'exec-1', workflowId: 'wf-1', status: 'running', workflowData: { name: 'Workflow 1' } },
+          { id: 'exec-2', workflowId: 'wf-2', status: 'running', workflowData: { name: 'Workflow 2' } }
+        ],
+        count: 2
+      });
 
       const resources = await provider.listResources();
 

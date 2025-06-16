@@ -203,8 +203,8 @@ export class MonitoringResourceProvider implements IResourceProvider {
           monitoredWorkflows: []
         },
         stats: {
-          totalExecutions: executions.count || executions.data?.length || 0,
-          totalWorkflows: workflows.count || workflows.data?.length || 0
+          totalExecutions: executions.data?.length || 0,
+          totalWorkflows: workflows.data?.length || 0
         }
       };
 
