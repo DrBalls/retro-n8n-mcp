@@ -35,6 +35,18 @@
     "README.md",
     "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DrBalls/retro-n8n-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DrBalls/retro-n8n-mcp/issues"
+  },
+  "homepage": "https://github.com/DrBalls/retro-n8n-mcp#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
     "@types/uuid": "^10.0.0",

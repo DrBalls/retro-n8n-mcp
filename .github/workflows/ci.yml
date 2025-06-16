@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, production ]
+  pull_request:
+    branches: [ master, production ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Type check
+        run: npm run typecheck
+      
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true  # Don't fail on lint warnings
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true  # Don't fail if codecov is down
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Verify build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/
+          
+          # Verify main entry point exists
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Build failed: dist/index.js not found"
+            exit 1
+          fi
+          
+          echo "✅ Build successful!"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true  # Don't fail on vulnerabilities, just report
+      
+      - name: Run dependency check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'n8n-mcp-server'
+          path: '.'
+          format: 'HTML'
+        continue-on-error: true
+      
+      - name: Upload dependency check results
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: reports/
+        if: always()
+
+  validate-production:
+    name: Validate Production Branch
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production' || github.base_ref == 'production'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for development files
+        run: |
+          echo "Checking for development files that shouldn't be in production..."
+          
+          DEV_FILES=(
+            ".roo"
+            ".taskmaster"
+            ".cursor"
+            "CLAUDE.md"
+            "coverage"
+            "tests"
+            ".eslintrc.json"
+            ".prettierrc.json"
+          )
+          
+          FOUND_FILES=()
+          for file in "${DEV_FILES[@]}"; do
+            if [ -e "$file" ]; then
+              FOUND_FILES+=("$file")
+            fi
+          done
+          
+          if [ ${#FOUND_FILES[@]} -gt 0 ]; then
+            echo "❌ Found development files in production branch:"
+            printf '%s\n' "${FOUND_FILES[@]}"
+            exit 1
+          fi
+          
+          echo "✅ Production branch is clean!"
+      
+      - name: Validate package.json
+        run: |
+          echo "Checking package.json for production readiness..."
+          
+          # Check if devDependencies exist in production
+          if grep -q '"devDependencies"' package.json; then
+            echo "⚠️  Warning: devDependencies found in production package.json"
+          fi
+          
+          # Verify required fields
+          for field in "name" "version" "description" "main" "license"; do
+            if ! grep -q "\"$field\":" package.json; then
+              echo "❌ Missing required field: $field"
+              exit 1
+            fi
+          done
+          
+          echo "✅ package.json is valid!"
