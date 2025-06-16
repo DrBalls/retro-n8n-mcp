@@ -13,7 +13,7 @@
     "lint": "eslint src --ext ts",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepare": "npm run build",
+    "prepare": "npm run build || true",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch"
   },
