@@ -398,11 +398,12 @@ export class MonitoringResourceProvider implements IResourceProvider {
     try {
       const execution = await this.apiClient.getExecution(executionId);
 
-      const nodeProgress = execution.data?.resultData?.runData ? 
-        Object.keys(execution.data.resultData.runData).map((nodeId: string) => ({
+      const runData = execution.data?.resultData?.runData as Record<string, any[]> | undefined;
+      const nodeProgress = runData ? 
+        Object.keys(runData).map((nodeId: string) => ({
           nodeId,
-          executionTime: execution.data.resultData.runData[nodeId][0]?.executionTime || 0,
-          startTime: execution.data.resultData.runData[nodeId][0]?.startTime
+          executionTime: runData[nodeId]?.[0]?.executionTime || 0,
+          startTime: runData[nodeId]?.[0]?.startTime
         })) : [];
 
       return JSON.stringify({
@@ -421,7 +422,7 @@ export class MonitoringResourceProvider implements IResourceProvider {
           totalNodes: execution.workflowData?.nodes?.length || 0,
           nodeProgress
         },
-        error: execution.data?.resultData?.error || null
+        error: (execution.data?.resultData as any)?.error || null
       }, null, 2);
     } catch (error) {
       return JSON.stringify({
