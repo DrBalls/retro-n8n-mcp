@@ -20,3 +20,6 @@ export * from './debug/index.js';
 
 // Batch tools
 export * from './batch/index.js';
+
+// Visualization tools
+export * from './visualization/index.js';

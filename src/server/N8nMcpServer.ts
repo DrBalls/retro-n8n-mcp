@@ -246,6 +246,17 @@ export class N8nMcpServer {
       this.toolRegistry.register(new BatchWorkflowsActivateTool());
       this.toolRegistry.register(new BatchWorkflowsDeactivateTool());
       this.toolRegistry.register(new BatchOperationStatusTool());
+      
+      // Visualization tools
+      const {
+        MermaidDiagramTool,
+        DependencyGraphTool,
+        WorkflowMapTool
+      } = await import('../tools/visualization/index.js');
+      
+      this.toolRegistry.register(new MermaidDiagramTool());
+      this.toolRegistry.register(new DependencyGraphTool());
+      this.toolRegistry.register(new WorkflowMapTool());
     }
 
     // Update tool registry context

@@ -270,12 +270,12 @@ export class DependencyGraphTool extends BaseTool {
       const label = `${node.name}\\n${node.type.split('.').pop()}`;
       let style = '';
       
-      if (node.isStartNode) {
+      if (workflowNode.disabled) {
+        style = ', style="rounded,dashed", color="#999999"';
+      } else if (node.isStartNode) {
         style = ', style="rounded,filled", fillcolor="#E8F5E9"';
       } else if (node.isEndNode) {
         style = ', style="rounded,filled", fillcolor="#FFEBEE"';
-      } else if (workflowNode.disabled) {
-        style = ', style="rounded,dashed", color="#999999"';
       }
       
       lines.push(`  "${id}" [label="${label}"${style}];`);
@@ -421,7 +421,7 @@ export class DependencyGraphTool extends BaseTool {
     if (node.type.includes('http')) {
       dataTypes.input.push('json', 'binary');
       dataTypes.output.push('json', 'binary', 'string');
-    } else if (node.type.includes('database')) {
+    } else if (node.type.includes('database') || node.type.includes('postgres') || node.type.includes('mysql') || node.type.includes('mongodb')) {
       dataTypes.input.push('sql-query');
       dataTypes.output.push('array', 'json');
     } else if (node.type.includes('function')) {
