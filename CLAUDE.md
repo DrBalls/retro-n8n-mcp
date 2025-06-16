@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.5 (January 17, 2025)
+## 📋 PROTOCOL VERSION: v1.6 (January 17, 2025)
 
 ### Protocol Changelog:
+- **v1.6** (January 17, 2025): Improved partial task handling and quick status options
+  - Added: Guidance for handling partial task completion
+  - Added: Quick status check option when tests are timing out
+  - Added: Pattern for TaskMaster file location troubleshooting
+  - Modified: Enhanced session workflow for multi-part task tracking
 - **v1.5** (January 17, 2025): Real-time monitoring integration and session recovery
   - Added: Session recovery protocol for crashed/interrupted sessions
   - Added: Real-time monitoring integration steps in common patterns
@@ -81,12 +86,18 @@ If the session includes a previous conversation summary or context:
    "Session Status:
    - Git: [Clean/Has changes]
    - Tests: [X passing, Y failing] (from npm test)
-   - Coverage: [X%] (from npm run test:coverage)
+     * If tests timeout: "Tests timing out - skipping detailed check"
+   - Coverage: [X%] (from npm run test:coverage if available)
    - Tools: [N total] ([breakdown by category])
    - Current Tasks: [X pending, Y in-progress, Z completed]
    - Next Priority: [Task #N - Title]
    - Session Goal: [What we'll focus on today]"
    ```
+   
+   **Quick Status Option**: If tests are timing out consistently:
+   - Skip test execution and note "Tests skipped due to timeout"
+   - Focus on git status and task progress
+   - Run targeted tests later for specific changes
 
 5. **Create Session Plan**
    - Use TaskMaster to identify tasks for this session
@@ -101,6 +112,12 @@ If the session includes a previous conversation summary or context:
    - Use TodoWrite/TodoRead for tracking micro-tasks
    - Document discoveries with `mcp__taskmaster-ai__update_task`
    - Add subtasks if new work discovered
+   
+   **For Multi-Part Tasks**:
+   - Break large tasks into TodoWrite items
+   - Track completion of each part
+   - If TaskMaster update fails, note progress in commit message
+   - Consider manual JSON edit for bulk task updates
 
 2. **Code Development**
    - Follow existing patterns and conventions
@@ -427,6 +444,8 @@ mcp__taskmaster-ai__update_task --id X --prompt "progress notes" --projectRoot /
 - **"Task not found"**: Ensure using correct task ID and file location
 - **Bulk updates failing**: Consider manual JSON editing instead
 - **WSL2 concerns**: The environment works perfectly - no path or permission issues
+- **Two task file locations**: Check both `.taskmaster/tasks/tasks.json` and `tasks/tasks.json`
+- **Update failures**: If task updates fail repeatedly, manually edit the JSON file
 
 ## 🔨 COMMON IMPLEMENTATION PATTERNS
 
