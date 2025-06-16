@@ -12,4 +12,10 @@ export * from './execution/index.js';
 export * from './monitoring/index.js';
 // Debug tools
 export * from './debug/index.js';
+// Batch tools
+export * from './batch/index.js';
+// Visualization tools
+export * from './visualization/index.js';
+// Version control tools
+export * from './version-control/index.js';
 //# sourceMappingURL=index.js.map

@@ -32,6 +32,19 @@ export declare const WorkflowNodeSchema: z.ZodObject<{
     disabled?: boolean | undefined;
     notes?: string | undefined;
 }>;
+export declare const WorkflowConnectionItemSchema: z.ZodObject<{
+    node: z.ZodString;
+    type: z.ZodString;
+    index: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    type: string;
+    node: string;
+    index: number;
+}, {
+    type: string;
+    node: string;
+    index: number;
+}>;
 export declare const WorkflowConnectionSchema: z.ZodObject<{
     source: z.ZodObject<{
         id: z.ZodString;
@@ -107,7 +120,7 @@ export declare const WorkflowSchema: z.ZodObject<{
         disabled?: boolean | undefined;
         notes?: string | undefined;
     }>, "many">;
-    connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodObject<{
+    connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodUnion<[z.ZodObject<{
         source: z.ZodObject<{
             id: z.ZodString;
             outputIndex: z.ZodOptional<z.ZodNumber>;
@@ -146,7 +159,19 @@ export declare const WorkflowSchema: z.ZodObject<{
             id: string;
             inputIndex?: number | undefined;
         };
-    }>, "many">, "many">>>;
+    }>, z.ZodObject<{
+        node: z.ZodString;
+        type: z.ZodString;
+        index: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        type: string;
+        node: string;
+        index: number;
+    }, {
+        type: string;
+        node: string;
+        index: number;
+    }>]>, "many">, "many">>>;
     settings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     staticData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -168,7 +193,11 @@ export declare const WorkflowSchema: z.ZodObject<{
         disabled?: boolean | undefined;
         notes?: string | undefined;
     }[];
-    connections: Record<string, Record<string, {
+    connections: Record<string, Record<string, ({
+        type: string;
+        node: string;
+        index: number;
+    } | {
         source: {
             id: string;
             outputIndex?: number | undefined;
@@ -177,7 +206,7 @@ export declare const WorkflowSchema: z.ZodObject<{
             id: string;
             inputIndex?: number | undefined;
         };
-    }[][]>>;
+    })[][]>>;
     createdAt: string;
     updatedAt: string;
     settings?: Record<string, unknown> | undefined;
@@ -199,7 +228,11 @@ export declare const WorkflowSchema: z.ZodObject<{
         disabled?: boolean | undefined;
         notes?: string | undefined;
     }[];
-    connections: Record<string, Record<string, {
+    connections: Record<string, Record<string, ({
+        type: string;
+        node: string;
+        index: number;
+    } | {
         source: {
             id: string;
             outputIndex?: number | undefined;
@@ -208,7 +241,7 @@ export declare const WorkflowSchema: z.ZodObject<{
             id: string;
             inputIndex?: number | undefined;
         };
-    }[][]>>;
+    })[][]>>;
     createdAt: string;
     updatedAt: string;
     settings?: Record<string, unknown> | undefined;
@@ -234,16 +267,19 @@ export declare const ExecutionDataSchema: z.ZodObject<{
         nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
         waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         waitingExecutionSource: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+        executionTime: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
         contextData: Record<string, unknown>;
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
+        executionTime?: number | undefined;
     }, {
         contextData: Record<string, unknown>;
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
+        executionTime?: number | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     startData?: Record<string, unknown> | undefined;
@@ -256,6 +292,7 @@ export declare const ExecutionDataSchema: z.ZodObject<{
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
+        executionTime?: number | undefined;
     } | undefined;
 }, {
     startData?: Record<string, unknown> | undefined;
@@ -268,6 +305,7 @@ export declare const ExecutionDataSchema: z.ZodObject<{
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
+        executionTime?: number | undefined;
     } | undefined;
 }>;
 export declare const ExecutionSchema: z.ZodObject<{
@@ -314,7 +352,7 @@ export declare const ExecutionSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }>, "many">;
-        connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodObject<{
+        connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodUnion<[z.ZodObject<{
             source: z.ZodObject<{
                 id: z.ZodString;
                 outputIndex: z.ZodOptional<z.ZodNumber>;
@@ -353,7 +391,19 @@ export declare const ExecutionSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }>, "many">, "many">>>;
+        }>, z.ZodObject<{
+            node: z.ZodString;
+            type: z.ZodString;
+            index: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            type: string;
+            node: string;
+            index: number;
+        }, {
+            type: string;
+            node: string;
+            index: number;
+        }>]>, "many">, "many">>>;
         settings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         staticData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -375,7 +425,11 @@ export declare const ExecutionSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -384,7 +438,7 @@ export declare const ExecutionSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -406,7 +460,11 @@ export declare const ExecutionSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -415,7 +473,7 @@ export declare const ExecutionSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -441,16 +499,19 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
             waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
             waitingExecutionSource: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+            executionTime: z.ZodOptional<z.ZodNumber>;
         }, "strip", z.ZodTypeAny, {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         }, {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
         startData?: Record<string, unknown> | undefined;
@@ -463,6 +524,7 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         } | undefined;
     }, {
         startData?: Record<string, unknown> | undefined;
@@ -475,6 +537,7 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         } | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -502,7 +565,11 @@ export declare const ExecutionSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -511,7 +578,7 @@ export declare const ExecutionSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -530,6 +597,7 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         } | undefined;
     } | undefined;
 }, {
@@ -557,7 +625,11 @@ export declare const ExecutionSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -566,7 +638,7 @@ export declare const ExecutionSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -585,6 +657,7 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
+            executionTime?: number | undefined;
         } | undefined;
     } | undefined;
 }>;
@@ -696,7 +769,7 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }>, "many">;
-        connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodObject<{
+        connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodUnion<[z.ZodObject<{
             source: z.ZodObject<{
                 id: z.ZodString;
                 outputIndex: z.ZodOptional<z.ZodNumber>;
@@ -735,7 +808,19 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }>, "many">, "many">>>;
+        }>, z.ZodObject<{
+            node: z.ZodString;
+            type: z.ZodString;
+            index: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            type: string;
+            node: string;
+            index: number;
+        }, {
+            type: string;
+            node: string;
+            index: number;
+        }>]>, "many">, "many">>>;
         settings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         staticData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -757,7 +842,11 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -766,7 +855,7 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -788,7 +877,11 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -797,7 +890,7 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -822,7 +915,11 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -831,7 +928,7 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -856,7 +953,11 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             disabled?: boolean | undefined;
             notes?: string | undefined;
         }[];
-        connections: Record<string, Record<string, {
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
             source: {
                 id: string;
                 outputIndex?: number | undefined;
@@ -865,7 +966,7 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 id: string;
                 inputIndex?: number | undefined;
             };
-        }[][]>>;
+        })[][]>>;
         createdAt: string;
         updatedAt: string;
         settings?: Record<string, unknown> | undefined;
@@ -920,7 +1021,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }>, "many">;
-            connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodObject<{
+            connections: z.ZodRecord<z.ZodString, z.ZodRecord<z.ZodString, z.ZodArray<z.ZodArray<z.ZodUnion<[z.ZodObject<{
                 source: z.ZodObject<{
                     id: z.ZodString;
                     outputIndex: z.ZodOptional<z.ZodNumber>;
@@ -959,7 +1060,19 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }>, "many">, "many">>>;
+            }>, z.ZodObject<{
+                node: z.ZodString;
+                type: z.ZodString;
+                index: z.ZodNumber;
+            }, "strip", z.ZodTypeAny, {
+                type: string;
+                node: string;
+                index: number;
+            }, {
+                type: string;
+                node: string;
+                index: number;
+            }>]>, "many">, "many">>>;
             settings: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
             staticData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
             tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
@@ -981,7 +1094,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -990,7 +1107,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1012,7 +1129,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -1021,7 +1142,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1047,16 +1168,19 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
                 waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
                 waitingExecutionSource: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
+                executionTime: z.ZodOptional<z.ZodNumber>;
             }, "strip", z.ZodTypeAny, {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             }, {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             }>>;
         }, "strip", z.ZodTypeAny, {
             startData?: Record<string, unknown> | undefined;
@@ -1069,6 +1193,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         }, {
             startData?: Record<string, unknown> | undefined;
@@ -1081,6 +1206,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
@@ -1108,7 +1234,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -1117,7 +1247,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1136,6 +1266,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         } | undefined;
     }, {
@@ -1163,7 +1294,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -1172,7 +1307,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1191,6 +1326,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         } | undefined;
     }>, "many">;
@@ -1221,7 +1357,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -1230,7 +1370,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1249,6 +1389,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         } | undefined;
     }[];
@@ -1279,7 +1420,11 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 disabled?: boolean | undefined;
                 notes?: string | undefined;
             }[];
-            connections: Record<string, Record<string, {
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
                 source: {
                     id: string;
                     outputIndex?: number | undefined;
@@ -1288,7 +1433,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     id: string;
                     inputIndex?: number | undefined;
                 };
-            }[][]>>;
+            })[][]>>;
             createdAt: string;
             updatedAt: string;
             settings?: Record<string, unknown> | undefined;
@@ -1307,6 +1452,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
+                executionTime?: number | undefined;
             } | undefined;
         } | undefined;
     }[];
@@ -1382,6 +1528,7 @@ export type N8nId = z.infer<typeof N8nIdSchema>;
 export type N8nTimestamp = z.infer<typeof N8nTimestampSchema>;
 export type WorkflowNode = z.infer<typeof WorkflowNodeSchema>;
 export type WorkflowConnection = z.infer<typeof WorkflowConnectionSchema>;
+export type WorkflowConnectionItem = z.infer<typeof WorkflowConnectionItemSchema>;
 export type Workflow = z.infer<typeof WorkflowSchema>;
 export type ExecutionStatus = z.infer<typeof ExecutionStatusSchema>;
 export type ExecutionData = z.infer<typeof ExecutionDataSchema>;

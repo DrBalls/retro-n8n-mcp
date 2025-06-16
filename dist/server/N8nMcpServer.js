@@ -144,6 +144,27 @@ export class N8nMcpServer {
             this.toolRegistry.register(new StatusDebugTool());
             this.toolRegistry.register(new HistoryDebugTool());
             this.toolRegistry.register(new TimelineDebugTool());
+            // Batch tools
+            const { BatchWorkflowsCreateTool, BatchWorkflowsUpdateTool, BatchWorkflowsDeleteTool, BatchWorkflowsActivateTool, BatchWorkflowsDeactivateTool, BatchOperationStatusTool } = await import('../tools/batch/index.js');
+            this.toolRegistry.register(new BatchWorkflowsCreateTool());
+            this.toolRegistry.register(new BatchWorkflowsUpdateTool());
+            this.toolRegistry.register(new BatchWorkflowsDeleteTool());
+            this.toolRegistry.register(new BatchWorkflowsActivateTool());
+            this.toolRegistry.register(new BatchWorkflowsDeactivateTool());
+            this.toolRegistry.register(new BatchOperationStatusTool());
+            // Visualization tools
+            const { MermaidDiagramTool, DependencyGraphTool, WorkflowMapTool } = await import('../tools/visualization/index.js');
+            this.toolRegistry.register(new MermaidDiagramTool());
+            this.toolRegistry.register(new DependencyGraphTool());
+            this.toolRegistry.register(new WorkflowMapTool());
+            // Version control tools
+            const { CreateVersionTool, CreateBranchTool, ListVersionsTool, MergeBranchTool, RollbackVersionTool, CompareVersionsTool } = await import('../tools/version-control/index.js');
+            this.toolRegistry.register(new CreateVersionTool());
+            this.toolRegistry.register(new CreateBranchTool());
+            this.toolRegistry.register(new ListVersionsTool());
+            this.toolRegistry.register(new MergeBranchTool());
+            this.toolRegistry.register(new RollbackVersionTool());
+            this.toolRegistry.register(new CompareVersionsTool());
         }
         // Update tool registry context
         this.updateToolContext();

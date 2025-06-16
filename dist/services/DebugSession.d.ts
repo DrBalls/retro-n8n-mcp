@@ -49,7 +49,7 @@ export interface IDebugSession {
 export interface IDebugSessionOptions {
     sessionId?: string;
     workflowId: string;
-    executionId?: string;
+    executionId?: string | undefined;
     breakpoints?: IBreakpoint[];
     watchExpressions?: IWatchExpression[];
 }

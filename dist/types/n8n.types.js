@@ -14,6 +14,13 @@ export const WorkflowNodeSchema = z.object({
     disabled: z.boolean().optional(),
     notes: z.string().optional(),
 });
+// Connection format as used in n8n API responses
+export const WorkflowConnectionItemSchema = z.object({
+    node: z.string(),
+    type: z.string(),
+    index: z.number(),
+});
+// Alternative format for some API endpoints
 export const WorkflowConnectionSchema = z.object({
     source: z.object({
         id: z.string(),
@@ -29,7 +36,7 @@ export const WorkflowSchema = z.object({
     name: z.string(),
     active: z.boolean(),
     nodes: z.array(WorkflowNodeSchema),
-    connections: z.record(z.record(z.array(z.array(WorkflowConnectionSchema)))),
+    connections: z.record(z.record(z.array(z.array(z.union([WorkflowConnectionSchema, WorkflowConnectionItemSchema]))))),
     settings: z.record(z.unknown()).optional(),
     staticData: z.record(z.unknown()).optional(),
     tags: z.array(z.string()).optional(),
@@ -59,6 +66,7 @@ export const ExecutionDataSchema = z.object({
         nodeExecutionStack: z.array(z.unknown()),
         waitingExecution: z.record(z.unknown()).optional(),
         waitingExecutionSource: z.record(z.unknown()).optional(),
+        executionTime: z.number().optional(),
     }).optional(),
 });
 export const ExecutionSchema = z.object({

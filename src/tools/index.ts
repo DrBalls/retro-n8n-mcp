@@ -23,3 +23,6 @@ export * from './batch/index.js';
 
 // Visualization tools
 export * from './visualization/index.js';
+
+// Version control tools
+export * from './version-control/index.js';

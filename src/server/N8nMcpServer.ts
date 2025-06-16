@@ -257,6 +257,23 @@ export class N8nMcpServer {
       this.toolRegistry.register(new MermaidDiagramTool());
       this.toolRegistry.register(new DependencyGraphTool());
       this.toolRegistry.register(new WorkflowMapTool());
+      
+      // Version control tools
+      const {
+        CreateVersionTool,
+        CreateBranchTool,
+        ListVersionsTool,
+        MergeBranchTool,
+        RollbackVersionTool,
+        CompareVersionsTool
+      } = await import('../tools/version-control/index.js');
+      
+      this.toolRegistry.register(new CreateVersionTool());
+      this.toolRegistry.register(new CreateBranchTool());
+      this.toolRegistry.register(new ListVersionsTool());
+      this.toolRegistry.register(new MergeBranchTool());
+      this.toolRegistry.register(new RollbackVersionTool());
+      this.toolRegistry.register(new CompareVersionsTool());
     }
 
     // Update tool registry context
