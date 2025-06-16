@@ -41,17 +41,17 @@ export declare const WorkflowChangeSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     timestamp: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    timestamp: string;
     path: string;
     type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+    timestamp: string;
     id: string;
     description?: string | undefined;
     oldValue?: unknown;
     newValue?: unknown;
 }, {
-    timestamp: string;
     path: string;
     type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+    timestamp: string;
     id: string;
     description?: string | undefined;
     oldValue?: unknown;
@@ -98,8 +98,8 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -108,8 +108,8 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             notes?: string | undefined;
         }, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -139,22 +139,22 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
                 inputIndex?: number | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }>, z.ZodObject<{
             node: z.ZodString;
@@ -176,13 +176,14 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         versionId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -195,29 +196,29 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -230,20 +231,19 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }>;
     changes: z.ZodArray<z.ZodObject<{
@@ -255,17 +255,17 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
         description: z.ZodOptional<z.ZodString>;
         timestamp: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        timestamp: string;
         path: string;
         type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        timestamp: string;
         id: string;
         description?: string | undefined;
         oldValue?: unknown;
         newValue?: unknown;
     }, {
-        timestamp: string;
         path: string;
         type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        timestamp: string;
         id: string;
         description?: string | undefined;
         oldValue?: unknown;
@@ -290,29 +290,22 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
     isSnapshot: z.ZodDefault<z.ZodBoolean>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
+    createdAt: string;
     tags: {
         name: string;
         description?: string | undefined;
         color?: string | undefined;
     }[];
-    createdAt: string;
-    workflowId: string;
-    version: {
-        patch: number;
-        major: number;
-        minor: number;
-        prerelease?: string | undefined;
-        build?: string | undefined;
-    };
+    id: string;
     workflow: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -325,57 +318,57 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     };
-    branchName: string;
-    versionString: string;
+    version: {
+        patch: number;
+        major: number;
+        minor: number;
+        prerelease?: string | undefined;
+        build?: string | undefined;
+    };
     changes: {
-        timestamp: string;
         path: string;
         type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        timestamp: string;
         id: string;
         description?: string | undefined;
         oldValue?: unknown;
         newValue?: unknown;
     }[];
+    workflowId: string;
+    branchName: string;
+    versionString: string;
     isSnapshot: boolean;
     metadata?: Record<string, unknown> | undefined;
     parentVersionId?: string | null | undefined;
     commitMessage?: string | undefined;
     author?: string | undefined;
 }, {
-    id: string;
     createdAt: string;
-    workflowId: string;
-    version: {
-        patch: number;
-        major: number;
-        minor: number;
-        prerelease?: string | undefined;
-        build?: string | undefined;
-    };
+    id: string;
     workflow: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -388,32 +381,39 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     };
-    versionString: string;
+    version: {
+        patch: number;
+        major: number;
+        minor: number;
+        prerelease?: string | undefined;
+        build?: string | undefined;
+    };
     changes: {
-        timestamp: string;
         path: string;
         type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        timestamp: string;
         id: string;
         description?: string | undefined;
         oldValue?: unknown;
         newValue?: unknown;
     }[];
+    workflowId: string;
+    versionString: string;
     tags?: {
         name: string;
         description?: string | undefined;
@@ -440,11 +440,11 @@ export declare const WorkflowBranchSchema: z.ZodObject<{
     createdAt: z.ZodString;
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    name: string;
     createdAt: string;
-    updatedAt: string;
+    name: string;
+    id: string;
     workflowId: string;
+    updatedAt: string;
     isActive: boolean;
     baseVersionId: string;
     headVersionId: string;
@@ -453,11 +453,11 @@ export declare const WorkflowBranchSchema: z.ZodObject<{
     mergedAt?: string | undefined;
     createdBy?: string | undefined;
 }, {
-    id: string;
-    name: string;
     createdAt: string;
-    updatedAt: string;
+    name: string;
+    id: string;
     workflowId: string;
+    updatedAt: string;
     baseVersionId: string;
     headVersionId: string;
     description?: string | undefined;
@@ -484,7 +484,7 @@ export declare const MergeConflictSchema: z.ZodObject<{
     sourceValue?: unknown;
     targetValue?: unknown;
     baseValue?: unknown;
-    resolution?: "source" | "target" | "manual" | "skip" | undefined;
+    resolution?: "target" | "source" | "manual" | "skip" | undefined;
     resolvedValue?: unknown;
 }, {
     path: string;
@@ -494,7 +494,7 @@ export declare const MergeConflictSchema: z.ZodObject<{
     sourceValue?: unknown;
     targetValue?: unknown;
     baseValue?: unknown;
-    resolution?: "source" | "target" | "manual" | "skip" | undefined;
+    resolution?: "target" | "source" | "manual" | "skip" | undefined;
     resolvedValue?: unknown;
 }>;
 export declare const MergeResultSchema: z.ZodObject<{
@@ -517,8 +517,8 @@ export declare const MergeResultSchema: z.ZodObject<{
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -527,8 +527,8 @@ export declare const MergeResultSchema: z.ZodObject<{
             notes?: string | undefined;
         }, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -558,22 +558,22 @@ export declare const MergeResultSchema: z.ZodObject<{
                 inputIndex?: number | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }>, z.ZodObject<{
             node: z.ZodString;
@@ -595,13 +595,14 @@ export declare const MergeResultSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         versionId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -614,29 +615,29 @@ export declare const MergeResultSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -649,20 +650,19 @@ export declare const MergeResultSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }>>;
     conflicts: z.ZodArray<z.ZodObject<{
@@ -683,7 +683,7 @@ export declare const MergeResultSchema: z.ZodObject<{
         sourceValue?: unknown;
         targetValue?: unknown;
         baseValue?: unknown;
-        resolution?: "source" | "target" | "manual" | "skip" | undefined;
+        resolution?: "target" | "source" | "manual" | "skip" | undefined;
         resolvedValue?: unknown;
     }, {
         path: string;
@@ -693,7 +693,7 @@ export declare const MergeResultSchema: z.ZodObject<{
         sourceValue?: unknown;
         targetValue?: unknown;
         baseValue?: unknown;
-        resolution?: "source" | "target" | "manual" | "skip" | undefined;
+        resolution?: "target" | "source" | "manual" | "skip" | undefined;
         resolvedValue?: unknown;
     }>, "many">;
     hasConflicts: z.ZodBoolean;
@@ -703,8 +703,8 @@ export declare const MergeResultSchema: z.ZodObject<{
     resolvedAt: z.ZodOptional<z.ZodString>;
     mergedAt: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     createdAt: string;
+    id: string;
     sourceBranchId: string;
     targetBranchId: string;
     conflicts: {
@@ -715,7 +715,7 @@ export declare const MergeResultSchema: z.ZodObject<{
         sourceValue?: unknown;
         targetValue?: unknown;
         baseValue?: unknown;
-        resolution?: "source" | "target" | "manual" | "skip" | undefined;
+        resolution?: "target" | "source" | "manual" | "skip" | undefined;
         resolvedValue?: unknown;
     }[];
     hasConflicts: boolean;
@@ -723,13 +723,14 @@ export declare const MergeResultSchema: z.ZodObject<{
     mergeStrategy: "manual" | "auto" | "ours" | "theirs";
     mergedAt?: string | undefined;
     mergedWorkflow?: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -742,26 +743,25 @@ export declare const MergeResultSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     } | undefined;
     resolvedAt?: string | undefined;
 }, {
-    id: string;
     createdAt: string;
+    id: string;
     sourceBranchId: string;
     targetBranchId: string;
     conflicts: {
@@ -772,7 +772,7 @@ export declare const MergeResultSchema: z.ZodObject<{
         sourceValue?: unknown;
         targetValue?: unknown;
         baseValue?: unknown;
-        resolution?: "source" | "target" | "manual" | "skip" | undefined;
+        resolution?: "target" | "source" | "manual" | "skip" | undefined;
         resolvedValue?: unknown;
     }[];
     hasConflicts: boolean;
@@ -780,13 +780,14 @@ export declare const MergeResultSchema: z.ZodObject<{
     mergeStrategy: "manual" | "auto" | "ours" | "theirs";
     mergedAt?: string | undefined;
     mergedWorkflow?: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -799,20 +800,19 @@ export declare const MergeResultSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     } | undefined;
     resolvedAt?: string | undefined;
@@ -824,14 +824,14 @@ export declare const DiffOperationSchema: z.ZodObject<{
     oldValue: z.ZodOptional<z.ZodUnknown>;
     from: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    operation: "replace" | "add" | "remove" | "move" | "copy";
     path: string;
+    operation: "replace" | "add" | "remove" | "move" | "copy";
     value?: unknown;
     oldValue?: unknown;
     from?: string | undefined;
 }, {
-    operation: "replace" | "add" | "remove" | "move" | "copy";
     path: string;
+    operation: "replace" | "add" | "remove" | "move" | "copy";
     value?: unknown;
     oldValue?: unknown;
     from?: string | undefined;
@@ -846,14 +846,14 @@ export declare const VersionDiffSchema: z.ZodObject<{
         oldValue: z.ZodOptional<z.ZodUnknown>;
         from: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        operation: "replace" | "add" | "remove" | "move" | "copy";
         path: string;
+        operation: "replace" | "add" | "remove" | "move" | "copy";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
     }, {
-        operation: "replace" | "add" | "remove" | "move" | "copy";
         path: string;
+        operation: "replace" | "add" | "remove" | "move" | "copy";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
@@ -893,8 +893,8 @@ export declare const VersionDiffSchema: z.ZodObject<{
     fromVersionId: string;
     toVersionId: string;
     operations: {
-        operation: "replace" | "add" | "remove" | "move" | "copy";
         path: string;
+        operation: "replace" | "add" | "remove" | "move" | "copy";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
@@ -912,8 +912,8 @@ export declare const VersionDiffSchema: z.ZodObject<{
     fromVersionId: string;
     toVersionId: string;
     operations: {
-        operation: "replace" | "add" | "remove" | "move" | "copy";
         path: string;
+        operation: "replace" | "add" | "remove" | "move" | "copy";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;

@@ -43,7 +43,8 @@ export interface IToolContext {
      */
     apiClient?: any;
     /**
-     * Real-time monitoring service instance (if available)
+     * Monitoring service instance (if available)
+     * Can be either RealtimeMonitoringService or comprehensive MonitoringService
      */
     monitoringService?: any;
     /**
@@ -82,7 +83,7 @@ export interface IToolMetadata {
     /**
      * Tool category for organization
      */
-    category: 'workflow' | 'execution' | 'credential' | 'system' | 'utility' | 'debug' | 'monitoring';
+    category: 'workflow' | 'execution' | 'credential' | 'system' | 'utility' | 'debug' | 'monitoring' | 'visualization' | 'version-control' | 'batch';
     /**
      * Required permissions or features
      */

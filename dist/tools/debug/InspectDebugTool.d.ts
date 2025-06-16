@@ -20,22 +20,22 @@ export declare class InspectDebugTool extends BaseTool {
         }>>;
     }, "strip", z.ZodTypeAny, {
         sessionId: string;
-        inspectType: "node" | "all" | "state" | "timeline" | "variable";
-        nodeId?: string | undefined;
-        variableName?: string | undefined;
+        inspectType: "all" | "node" | "state" | "timeline" | "variable";
         timeRange?: {
             start?: string | undefined;
             end?: string | undefined;
         } | undefined;
+        nodeId?: string | undefined;
+        variableName?: string | undefined;
     }, {
         sessionId: string;
-        nodeId?: string | undefined;
-        inspectType?: "node" | "all" | "state" | "timeline" | "variable" | undefined;
-        variableName?: string | undefined;
         timeRange?: {
             start?: string | undefined;
             end?: string | undefined;
         } | undefined;
+        nodeId?: string | undefined;
+        inspectType?: "all" | "node" | "state" | "timeline" | "variable" | undefined;
+        variableName?: string | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;
     getMetadata(): IToolMetadata;

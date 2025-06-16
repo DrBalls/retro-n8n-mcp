@@ -12,14 +12,14 @@ export declare class DependencyGraphTool extends BaseTool {
         groupByType: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
         workflowId: string;
-        format: "mermaid" | "json" | "dot";
+        format: "json" | "mermaid" | "dot";
         layout: "hierarchical" | "circular" | "force-directed";
         showDataTypes: boolean;
         highlightCriticalPath: boolean;
         groupByType: boolean;
     }, {
         workflowId: string;
-        format?: "mermaid" | "json" | "dot" | undefined;
+        format?: "json" | "mermaid" | "dot" | undefined;
         layout?: "hierarchical" | "circular" | "force-directed" | undefined;
         showDataTypes?: boolean | undefined;
         highlightCriticalPath?: boolean | undefined;

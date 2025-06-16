@@ -11,9 +11,9 @@ export declare class ListVersionsTool extends BaseTool {
         includeSnapshots: z.ZodDefault<z.ZodBoolean>;
         includeDetails: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        workflowId: string;
         limit: number;
         offset: number;
+        workflowId: string;
         includeDetails: boolean;
         includeSnapshots: boolean;
         branchName?: string | undefined;

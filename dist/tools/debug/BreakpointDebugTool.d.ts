@@ -12,14 +12,14 @@ export declare class BreakpointDebugTool extends BaseTool {
     }, "strip", z.ZodTypeAny, {
         sessionId: string;
         action: "list" | "add" | "remove" | "enable" | "disable";
-        nodeId?: string | undefined;
         condition?: string | undefined;
+        nodeId?: string | undefined;
         breakpointId?: string | undefined;
     }, {
         sessionId: string;
         action: "list" | "add" | "remove" | "enable" | "disable";
-        nodeId?: string | undefined;
         condition?: string | undefined;
+        nodeId?: string | undefined;
         breakpointId?: string | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;

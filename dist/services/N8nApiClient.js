@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { RequestQueue } from '../utils/RequestQueue.js';
 import { SimpleCache } from '../utils/SimpleCache.js';
+import { MultiTierCacheManager } from './cache/MultiTierCacheManager.js';
 import { N8nApiError, N8nConnectionError, N8nRateLimitError, N8nAuthenticationError, N8nTimeoutError, } from '../utils/errors.js';
 import { ErrorHandler } from '../utils/ErrorHandler.js';
 import { N8nApiConfigSchema, getN8nConfigFromEnv, } from '../types/config.types.js';
@@ -9,8 +10,9 @@ export class N8nApiClient {
     config;
     queue;
     cache;
+    multiTierCache;
     baseUrl;
-    constructor(config = {}) {
+    constructor(config = {}, cacheConfig) {
         // Merge with environment config
         const envConfig = getN8nConfigFromEnv();
         const mergedConfig = { ...envConfig, ...config };
@@ -39,6 +41,10 @@ export class N8nApiClient {
             maxSize: this.config.cache.maxSize,
             defaultTtl: this.config.cache.ttl,
         });
+        // Initialize multi-tier cache if config provided
+        if (cacheConfig) {
+            this.multiTierCache = new MultiTierCacheManager(cacheConfig);
+        }
         // Set up response interceptors
         this.setupInterceptors();
     }
@@ -83,14 +89,56 @@ export class N8nApiClient {
     getCacheKey(method, path, params) {
         return `${method}:${path}:${JSON.stringify(params || {})}`;
     }
+    generateCacheTags(path, params) {
+        const tags = [];
+        // Add path-based tags
+        if (path.includes('/workflows')) {
+            tags.push('workflows');
+            if (path.match(/\/workflows\/([^\/]+)/)) {
+                const workflowId = path.match(/\/workflows\/([^\/]+)/)?.[1];
+                if (workflowId && workflowId !== 'active') {
+                    tags.push(`workflow:${workflowId}`);
+                }
+            }
+        }
+        if (path.includes('/executions')) {
+            tags.push('executions');
+            if (path.match(/\/executions\/([^\/]+)/)) {
+                const executionId = path.match(/\/executions\/([^\/]+)/)?.[1];
+                if (executionId) {
+                    tags.push(`execution:${executionId}`);
+                }
+            }
+        }
+        if (path.includes('/credentials')) {
+            tags.push('credentials');
+            if (path.match(/\/credentials\/([^\/]+)/)) {
+                const credentialId = path.match(/\/credentials\/([^\/]+)/)?.[1];
+                if (credentialId) {
+                    tags.push(`credential:${credentialId}`);
+                }
+            }
+        }
+        return tags;
+    }
     async request(method, path, options = {}) {
         const { data, params, requestOptions } = options;
         // Check cache for GET requests
         if (method === 'GET' && this.config.cache.enabled && !requestOptions?.skipCache) {
             const cacheKey = this.getCacheKey(method, path, params);
-            const cached = this.cache.get(cacheKey);
-            if (cached) {
-                return cached;
+            // Try multi-tier cache first
+            if (this.multiTierCache) {
+                const multiTierResult = await this.multiTierCache.get(cacheKey);
+                if (multiTierResult.hit) {
+                    return multiTierResult.value;
+                }
+            }
+            else {
+                // Fallback to simple cache
+                const cached = this.cache.get(cacheKey);
+                if (cached) {
+                    return cached;
+                }
             }
         }
         // Create axios config
@@ -108,7 +156,15 @@ export class N8nApiClient {
         // Cache successful GET requests
         if (method === 'GET' && this.config.cache.enabled && response.data) {
             const cacheKey = this.getCacheKey(method, path, params);
-            this.cache.set(cacheKey, response.data);
+            if (this.multiTierCache) {
+                // Use multi-tier cache with appropriate tags
+                const tags = this.generateCacheTags(path, params);
+                await this.multiTierCache.set(cacheKey, response.data, { tags });
+            }
+            else {
+                // Fallback to simple cache
+                this.cache.set(cacheKey, response.data);
+            }
         }
         return response.data;
     }
@@ -234,6 +290,20 @@ export class N8nApiClient {
     }
     resumeQueue() {
         this.queue.resume();
+    }
+    getCacheManager() {
+        return this.multiTierCache;
+    }
+    async closeCache() {
+        if (this.multiTierCache) {
+            await this.multiTierCache.close();
+        }
+    }
+    async invalidateCache(pattern) {
+        if (this.multiTierCache && pattern) {
+            return await this.multiTierCache.invalidateByPattern(pattern);
+        }
+        return 0;
     }
 }
 //# sourceMappingURL=N8nApiClient.js.map

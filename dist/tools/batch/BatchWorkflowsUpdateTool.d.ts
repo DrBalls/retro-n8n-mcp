@@ -15,22 +15,22 @@ export declare class BatchWorkflowsUpdateTool extends BaseTool {
             active: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
             id: string;
+            tags?: string[] | undefined;
             name?: string | undefined;
             active?: boolean | undefined;
             nodes?: any[] | undefined;
             connections?: Record<string, any> | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }, {
             id: string;
+            tags?: string[] | undefined;
             name?: string | undefined;
             active?: boolean | undefined;
             nodes?: any[] | undefined;
             connections?: Record<string, any> | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }>, "many">;
         options: z.ZodOptional<z.ZodObject<{
             stopOnError: z.ZodDefault<z.ZodBoolean>;
@@ -54,13 +54,13 @@ export declare class BatchWorkflowsUpdateTool extends BaseTool {
     }, "strip", z.ZodTypeAny, {
         updates: {
             id: string;
+            tags?: string[] | undefined;
             name?: string | undefined;
             active?: boolean | undefined;
             nodes?: any[] | undefined;
             connections?: Record<string, any> | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }[];
         options?: {
             concurrency: number;
@@ -72,13 +72,13 @@ export declare class BatchWorkflowsUpdateTool extends BaseTool {
     }, {
         updates: {
             id: string;
+            tags?: string[] | undefined;
             name?: string | undefined;
             active?: boolean | undefined;
             nodes?: any[] | undefined;
             connections?: Record<string, any> | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }[];
         options?: {
             concurrency?: number | undefined;

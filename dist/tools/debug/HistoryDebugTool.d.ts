@@ -10,8 +10,8 @@ export declare class HistoryDebugTool extends BaseTool {
         limit: number;
         workflowId?: string | undefined;
     }, {
-        workflowId?: string | undefined;
         limit?: number | undefined;
+        workflowId?: string | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;
     getMetadata(): IToolMetadata;

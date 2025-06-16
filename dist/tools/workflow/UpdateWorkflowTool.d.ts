@@ -59,6 +59,10 @@ export declare class UpdateWorkflowTool extends BaseTool {
         }>]>, "many">>;
     }, "strip", z.ZodTypeAny, {
         id: string;
+        tags?: (string | {
+            name: string;
+            id?: string | undefined;
+        })[] | undefined;
         name?: string | undefined;
         active?: boolean | undefined;
         nodes?: any[] | undefined;
@@ -76,12 +80,12 @@ export declare class UpdateWorkflowTool extends BaseTool {
             callerPolicy?: "none" | "any" | "workflowsFromAList" | "workflowsFromSameOwner" | undefined;
         } | undefined;
         staticData?: any;
-        tags?: (string | {
-            name: string;
-            id?: string | undefined;
-        })[] | undefined;
     }, {
         id: string;
+        tags?: (string | {
+            name: string;
+            id?: string | undefined;
+        })[] | undefined;
         name?: string | undefined;
         active?: boolean | undefined;
         nodes?: any[] | undefined;
@@ -99,10 +103,6 @@ export declare class UpdateWorkflowTool extends BaseTool {
             callerPolicy?: "none" | "any" | "workflowsFromAList" | "workflowsFromSameOwner" | undefined;
         } | undefined;
         staticData?: any;
-        tags?: (string | {
-            name: string;
-            id?: string | undefined;
-        })[] | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;
     getMetadata(): IToolMetadata;

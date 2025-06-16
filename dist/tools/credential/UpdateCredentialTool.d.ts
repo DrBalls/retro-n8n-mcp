@@ -20,8 +20,8 @@ export declare class UpdateCredentialTool extends BaseTool {
         tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         id: string;
-        name?: string | undefined;
         tags?: string[] | undefined;
+        name?: string | undefined;
         data?: Record<string, unknown> | undefined;
         nodesAccess?: {
             nodeType: string;
@@ -29,8 +29,8 @@ export declare class UpdateCredentialTool extends BaseTool {
         }[] | undefined;
     }, {
         id: string;
-        name?: string | undefined;
         tags?: string[] | undefined;
+        name?: string | undefined;
         data?: Record<string, unknown> | undefined;
         nodesAccess?: {
             nodeType: string;

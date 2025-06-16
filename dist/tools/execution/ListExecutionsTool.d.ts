@@ -21,8 +21,8 @@ export declare class ListExecutionsTool extends BaseTool {
         endDate?: string | undefined;
     }, {
         status?: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting" | undefined;
-        workflowId?: string | undefined;
         limit?: number | undefined;
+        workflowId?: string | undefined;
         cursor?: string | undefined;
         includeData?: boolean | undefined;
         startDate?: string | undefined;

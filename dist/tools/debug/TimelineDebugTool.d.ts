@@ -18,21 +18,21 @@ export declare class TimelineDebugTool extends BaseTool {
         }>>;
         includeData: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        includeData: boolean;
         sessionId: string;
-        format: "text" | "mermaid" | "json";
+        includeData: boolean;
+        format: "json" | "text" | "mermaid";
         timeRange?: {
             start?: string | undefined;
             end?: string | undefined;
         } | undefined;
     }, {
         sessionId: string;
-        includeData?: boolean | undefined;
         timeRange?: {
             start?: string | undefined;
             end?: string | undefined;
         } | undefined;
-        format?: "text" | "mermaid" | "json" | undefined;
+        includeData?: boolean | undefined;
+        format?: "json" | "text" | "mermaid" | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;
     private generateTextTimeline;

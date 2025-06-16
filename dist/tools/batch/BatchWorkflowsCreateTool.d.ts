@@ -17,17 +17,17 @@ export declare class BatchWorkflowsCreateTool extends BaseTool {
             active: boolean;
             nodes: any[];
             connections: Record<string, any>;
+            tags?: string[] | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }, {
             name: string;
             nodes: any[];
             connections: Record<string, any>;
+            tags?: string[] | undefined;
             active?: boolean | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }>, "many">;
         options: z.ZodOptional<z.ZodObject<{
             stopOnError: z.ZodDefault<z.ZodBoolean>;
@@ -51,9 +51,9 @@ export declare class BatchWorkflowsCreateTool extends BaseTool {
             active: boolean;
             nodes: any[];
             connections: Record<string, any>;
+            tags?: string[] | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }[];
         options?: {
             concurrency: number;
@@ -66,10 +66,10 @@ export declare class BatchWorkflowsCreateTool extends BaseTool {
             name: string;
             nodes: any[];
             connections: Record<string, any>;
+            tags?: string[] | undefined;
             active?: boolean | undefined;
             settings?: Record<string, any> | undefined;
             staticData?: Record<string, any> | undefined;
-            tags?: string[] | undefined;
         }[];
         options?: {
             concurrency?: number | undefined;

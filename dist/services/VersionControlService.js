@@ -61,9 +61,30 @@ export class VersionControlService {
         // Get or create branch
         let branch = await this.storage.getBranchByName(workflowId, branchName);
         if (!branch) {
-            branch = await this.createBranch(workflowId, branchName, {
-                description: `Auto-created branch: ${branchName}`,
-            });
+            // For the first version, we need to create the branch without a base version
+            const existingVersions = await this.storage.listVersions(workflowId);
+            if (existingVersions.length === 0) {
+                // This is the first version ever, create branch without base
+                const newBranch = {
+                    id: uuidv4(),
+                    workflowId,
+                    name: branchName,
+                    description: `Auto-created branch: ${branchName}`,
+                    baseVersionId: '', // Will be set after creating the first version
+                    headVersionId: '', // Will be set after creating the first version  
+                    isActive: true,
+                    isMerged: false,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+                await this.storage.saveBranch(newBranch);
+                branch = newBranch;
+            }
+            else {
+                branch = await this.createBranch(workflowId, branchName, {
+                    description: `Auto-created branch: ${branchName}`,
+                });
+            }
         }
         // Calculate version number
         const version = await this.calculateNextVersion(workflowId, branchName, options.versionIncrement || 'patch');
@@ -85,8 +106,11 @@ export class VersionControlService {
             isSnapshot: options.isSnapshot || false,
         };
         await this.storage.saveVersion(workflowVersion);
-        // Update branch head
+        // Update branch head and base (if this is the first version)
         branch.headVersionId = workflowVersion.id;
+        if (!branch.baseVersionId) {
+            branch.baseVersionId = workflowVersion.id;
+        }
         branch.updatedAt = new Date().toISOString();
         await this.storage.saveBranch(branch);
         this.logger.info('Version created', {
