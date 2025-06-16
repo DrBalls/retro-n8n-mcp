@@ -202,6 +202,33 @@ export class N8nMcpServer {
       const { RealtimeExecutionMonitorTool, WorkflowMetricsMonitorTool } = await import('../tools/monitoring/index.js');
       this.toolRegistry.register(new RealtimeExecutionMonitorTool());
       this.toolRegistry.register(new WorkflowMetricsMonitorTool());
+      
+      // Debug tools
+      const { 
+        StartDebugSessionTool,
+        StepDebugTool,
+        InspectDebugTool,
+        BreakpointDebugTool,
+        WatchDebugTool,
+        PauseDebugTool,
+        ResumeDebugTool,
+        StopDebugTool,
+        StatusDebugTool,
+        HistoryDebugTool,
+        TimelineDebugTool
+      } = await import('../tools/debug/index.js');
+      
+      this.toolRegistry.register(new StartDebugSessionTool());
+      this.toolRegistry.register(new StepDebugTool());
+      this.toolRegistry.register(new InspectDebugTool());
+      this.toolRegistry.register(new BreakpointDebugTool());
+      this.toolRegistry.register(new WatchDebugTool());
+      this.toolRegistry.register(new PauseDebugTool());
+      this.toolRegistry.register(new ResumeDebugTool());
+      this.toolRegistry.register(new StopDebugTool());
+      this.toolRegistry.register(new StatusDebugTool());
+      this.toolRegistry.register(new HistoryDebugTool());
+      this.toolRegistry.register(new TimelineDebugTool());
     }
 
     // Update tool registry context

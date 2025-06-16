@@ -14,3 +14,6 @@ export * from './execution/index.js';
 
 // Monitoring tools
 export * from './monitoring/index.js';
+
+// Debug tools
+export * from './debug/index.js';

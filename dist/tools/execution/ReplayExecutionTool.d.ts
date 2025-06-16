@@ -9,8 +9,8 @@ export declare class ReplayExecutionTool extends BaseTool {
         waitForCompletion: z.ZodDefault<z.ZodBoolean>;
         timeout: z.ZodOptional<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        waitForCompletion: boolean;
         executionId: string;
+        waitForCompletion: boolean;
         timeout?: number | undefined;
         modifyData?: Record<string, unknown> | undefined;
     }, {

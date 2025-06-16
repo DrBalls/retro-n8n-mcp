@@ -8,4 +8,8 @@ export * from './system/TestConnectionTool.js';
 export * from './workflow/index.js';
 // Execution tools
 export * from './execution/index.js';
+// Monitoring tools
+export * from './monitoring/index.js';
+// Debug tools
+export * from './debug/index.js';
 //# sourceMappingURL=index.js.map

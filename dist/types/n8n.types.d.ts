@@ -219,7 +219,7 @@ export declare const WorkflowSchema: z.ZodObject<{
 export declare const ExecutionStatusSchema: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
 export declare const ExecutionDataSchema: z.ZodObject<{
     startData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
-    resultData: z.ZodObject<{
+    resultData: z.ZodOptional<z.ZodObject<{
         runData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
         lastNodeExecuted: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
@@ -228,8 +228,8 @@ export declare const ExecutionDataSchema: z.ZodObject<{
     }, {
         runData: Record<string, unknown>;
         lastNodeExecuted?: string | undefined;
-    }>;
-    executionData: z.ZodObject<{
+    }>>;
+    executionData: z.ZodOptional<z.ZodObject<{
         contextData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
         nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
         waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
@@ -244,31 +244,31 @@ export declare const ExecutionDataSchema: z.ZodObject<{
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
-    }>;
+    }>>;
 }, "strip", z.ZodTypeAny, {
-    resultData: {
+    startData?: Record<string, unknown> | undefined;
+    resultData?: {
         runData: Record<string, unknown>;
         lastNodeExecuted?: string | undefined;
-    };
-    executionData: {
+    } | undefined;
+    executionData?: {
         contextData: Record<string, unknown>;
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
-    };
-    startData?: Record<string, unknown> | undefined;
+    } | undefined;
 }, {
-    resultData: {
+    startData?: Record<string, unknown> | undefined;
+    resultData?: {
         runData: Record<string, unknown>;
         lastNodeExecuted?: string | undefined;
-    };
-    executionData: {
+    } | undefined;
+    executionData?: {
         contextData: Record<string, unknown>;
         nodeExecutionStack: unknown[];
         waitingExecution?: Record<string, unknown> | undefined;
         waitingExecutionSource?: Record<string, unknown> | undefined;
-    };
-    startData?: Record<string, unknown> | undefined;
+    } | undefined;
 }>;
 export declare const ExecutionSchema: z.ZodObject<{
     id: z.ZodString;
@@ -426,7 +426,7 @@ export declare const ExecutionSchema: z.ZodObject<{
     status: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
     data: z.ZodOptional<z.ZodObject<{
         startData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
-        resultData: z.ZodObject<{
+        resultData: z.ZodOptional<z.ZodObject<{
             runData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
             lastNodeExecuted: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
@@ -435,8 +435,8 @@ export declare const ExecutionSchema: z.ZodObject<{
         }, {
             runData: Record<string, unknown>;
             lastNodeExecuted?: string | undefined;
-        }>;
-        executionData: z.ZodObject<{
+        }>>;
+        executionData: z.ZodOptional<z.ZodObject<{
             contextData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
             nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
             waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
@@ -451,31 +451,31 @@ export declare const ExecutionSchema: z.ZodObject<{
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
-        }>;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        resultData: {
+        startData?: Record<string, unknown> | undefined;
+        resultData?: {
             runData: Record<string, unknown>;
             lastNodeExecuted?: string | undefined;
-        };
-        executionData: {
+        } | undefined;
+        executionData?: {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
-        };
-        startData?: Record<string, unknown> | undefined;
+        } | undefined;
     }, {
-        resultData: {
+        startData?: Record<string, unknown> | undefined;
+        resultData?: {
             runData: Record<string, unknown>;
             lastNodeExecuted?: string | undefined;
-        };
-        executionData: {
+        } | undefined;
+        executionData?: {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
-        };
-        startData?: Record<string, unknown> | undefined;
+        } | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
@@ -520,17 +520,17 @@ export declare const ExecutionSchema: z.ZodObject<{
         versionId?: string | undefined;
     } | undefined;
     data?: {
-        resultData: {
+        startData?: Record<string, unknown> | undefined;
+        resultData?: {
             runData: Record<string, unknown>;
             lastNodeExecuted?: string | undefined;
-        };
-        executionData: {
+        } | undefined;
+        executionData?: {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
-        };
-        startData?: Record<string, unknown> | undefined;
+        } | undefined;
     } | undefined;
 }, {
     status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
@@ -575,17 +575,17 @@ export declare const ExecutionSchema: z.ZodObject<{
         versionId?: string | undefined;
     } | undefined;
     data?: {
-        resultData: {
+        startData?: Record<string, unknown> | undefined;
+        resultData?: {
             runData: Record<string, unknown>;
             lastNodeExecuted?: string | undefined;
-        };
-        executionData: {
+        } | undefined;
+        executionData?: {
             contextData: Record<string, unknown>;
             nodeExecutionStack: unknown[];
             waitingExecution?: Record<string, unknown> | undefined;
             waitingExecutionSource?: Record<string, unknown> | undefined;
-        };
-        startData?: Record<string, unknown> | undefined;
+        } | undefined;
     } | undefined;
 }>;
 export declare const CredentialTypeSchema: z.ZodObject<{
@@ -1032,7 +1032,7 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
         status: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
         data: z.ZodOptional<z.ZodObject<{
             startData: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
-            resultData: z.ZodObject<{
+            resultData: z.ZodOptional<z.ZodObject<{
                 runData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
                 lastNodeExecuted: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
@@ -1041,8 +1041,8 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             }, {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            }>;
-            executionData: z.ZodObject<{
+            }>>;
+            executionData: z.ZodOptional<z.ZodObject<{
                 contextData: z.ZodRecord<z.ZodString, z.ZodUnknown>;
                 nodeExecutionStack: z.ZodArray<z.ZodUnknown, "many">;
                 waitingExecution: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
@@ -1057,31 +1057,31 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            }>;
+            }>>;
         }, "strip", z.ZodTypeAny, {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         }, {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         }>>;
     }, "strip", z.ZodTypeAny, {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
@@ -1126,17 +1126,17 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             versionId?: string | undefined;
         } | undefined;
         data?: {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         } | undefined;
     }, {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
@@ -1181,17 +1181,17 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             versionId?: string | undefined;
         } | undefined;
         data?: {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         } | undefined;
     }>, "many">;
     nextCursor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -1239,17 +1239,17 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             versionId?: string | undefined;
         } | undefined;
         data?: {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         } | undefined;
     }[];
     nextCursor?: string | null | undefined;
@@ -1297,17 +1297,17 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             versionId?: string | undefined;
         } | undefined;
         data?: {
-            resultData: {
+            startData?: Record<string, unknown> | undefined;
+            resultData?: {
                 runData: Record<string, unknown>;
                 lastNodeExecuted?: string | undefined;
-            };
-            executionData: {
+            } | undefined;
+            executionData?: {
                 contextData: Record<string, unknown>;
                 nodeExecutionStack: unknown[];
                 waitingExecution?: Record<string, unknown> | undefined;
                 waitingExecutionSource?: Record<string, unknown> | undefined;
-            };
-            startData?: Record<string, unknown> | undefined;
+            } | undefined;
         } | undefined;
     }[];
     nextCursor?: string | null | undefined;

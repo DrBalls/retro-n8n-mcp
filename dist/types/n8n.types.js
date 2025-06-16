@@ -53,13 +53,13 @@ export const ExecutionDataSchema = z.object({
     resultData: z.object({
         runData: z.record(z.unknown()),
         lastNodeExecuted: z.string().optional(),
-    }),
+    }).optional(),
     executionData: z.object({
         contextData: z.record(z.unknown()),
         nodeExecutionStack: z.array(z.unknown()),
         waitingExecution: z.record(z.unknown()).optional(),
         waitingExecutionSource: z.record(z.unknown()).optional(),
-    }),
+    }).optional(),
 });
 export const ExecutionSchema = z.object({
     id: N8nIdSchema,

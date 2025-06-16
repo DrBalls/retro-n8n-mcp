@@ -99,7 +99,7 @@ export interface IToolMetadata {
   /**
    * Tool category for organization
    */
-  category: 'workflow' | 'execution' | 'credential' | 'system' | 'utility';
+  category: 'workflow' | 'execution' | 'credential' | 'system' | 'utility' | 'debug' | 'monitoring';
 
   /**
    * Required permissions or features

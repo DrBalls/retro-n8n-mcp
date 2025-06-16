@@ -91,17 +91,17 @@ export declare const QueueConfigSchema: z.ZodObject<{
     highWater: z.ZodDefault<z.ZodNumber>;
     strategy: z.ZodDefault<z.ZodEnum<["fifo", "lifo", "priority"]>>;
 }, "strip", z.ZodTypeAny, {
+    strategy: "fifo" | "lifo" | "priority";
     concurrency: number;
     interval: number;
     intervalCap: number;
     highWater: number;
-    strategy: "fifo" | "lifo" | "priority";
 }, {
+    strategy?: "fifo" | "lifo" | "priority" | undefined;
     concurrency?: number | undefined;
     interval?: number | undefined;
     intervalCap?: number | undefined;
     highWater?: number | undefined;
-    strategy?: "fifo" | "lifo" | "priority" | undefined;
 }>;
 export declare const N8nErrorResponseSchema: z.ZodObject<{
     code: z.ZodNumber;

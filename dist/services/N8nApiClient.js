@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { RequestQueue } from '../utils/RequestQueue.js';
 import { SimpleCache } from '../utils/SimpleCache.js';
-import { N8nApiError, N8nConnectionError, N8nRateLimitError, N8nAuthenticationError, N8nTimeoutError, isRetryableError, } from '../utils/errors.js';
+import { N8nApiError, N8nConnectionError, N8nRateLimitError, N8nAuthenticationError, N8nTimeoutError, } from '../utils/errors.js';
+import { ErrorHandler } from '../utils/ErrorHandler.js';
 import { N8nApiConfigSchema, getN8nConfigFromEnv, } from '../types/config.types.js';
 export class N8nApiClient {
     axios;
@@ -73,24 +74,11 @@ export class N8nApiClient {
         });
     }
     async executeWithRetry(fn, retries = this.config.retry.maxRetries, delay = this.config.retry.initialDelay) {
-        try {
-            return await fn();
-        }
-        catch (error) {
-            if (retries === 0 || !isRetryableError(error)) {
-                throw error;
-            }
-            // Calculate next delay with exponential backoff
-            const nextDelay = Math.min(delay * this.config.retry.backoffMultiplier, this.config.retry.maxDelay);
-            // If rate limited, use the retry-after header
-            if (error instanceof N8nRateLimitError && error.retryAfter) {
-                await new Promise(resolve => setTimeout(resolve, error.retryAfter));
-            }
-            else {
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
-            return this.executeWithRetry(fn, retries - 1, nextDelay);
-        }
+        return ErrorHandler.retry(fn, {
+            operation: 'n8nApiRequest',
+            resourceType: 'api',
+            maxAttempts: retries + 1
+        }, retries + 1);
     }
     getCacheKey(method, path, params) {
         return `${method}:${path}:${JSON.stringify(params || {})}`;

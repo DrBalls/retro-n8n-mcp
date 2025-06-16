@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Tool as McpTool } from '@modelcontextprotocol/sdk/types.js';
+import { IErrorContext } from '../../utils/ErrorHandler.js';
 /**
  * Base interface for all n8n MCP tools
  */
@@ -41,6 +42,10 @@ export interface IToolContext {
      * n8n API client instance (if available)
      */
     apiClient?: any;
+    /**
+     * Real-time monitoring service instance (if available)
+     */
+    monitoringService?: any;
     /**
      * Request ID for tracing
      */
@@ -115,7 +120,7 @@ export declare abstract class BaseTool implements ITool {
      */
     toMcpTool(): McpTool;
     /**
-     * Validate input parameters
+     * Validate input parameters with enhanced error handling
      */
     protected validateInput<T>(params: unknown): T;
     /**
@@ -123,9 +128,13 @@ export declare abstract class BaseTool implements ITool {
      */
     protected createTextResponse(text: string, metadata?: Record<string, unknown>): IToolResponse;
     /**
-     * Create an error response
+     * Create an error response with diagnostics
      */
     protected createErrorResponse(error: string | Error, metadata?: Record<string, unknown>): IToolResponse;
+    /**
+     * Execute with error handling and recovery
+     */
+    protected executeWithErrorHandling<T>(operation: () => Promise<T>, context: IErrorContext): Promise<T>;
     /**
      * Convert Zod schema to JSON Schema for MCP
      */

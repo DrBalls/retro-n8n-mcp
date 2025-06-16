@@ -7,8 +7,8 @@ export declare class StopExecutionTool extends BaseTool {
         executionId: z.ZodString;
         force: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        force: boolean;
         executionId: string;
+        force: boolean;
     }, {
         executionId: string;
         force?: boolean | undefined;
