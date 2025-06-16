@@ -229,6 +229,23 @@ export class N8nMcpServer {
       this.toolRegistry.register(new StatusDebugTool());
       this.toolRegistry.register(new HistoryDebugTool());
       this.toolRegistry.register(new TimelineDebugTool());
+      
+      // Batch tools
+      const {
+        BatchWorkflowsCreateTool,
+        BatchWorkflowsUpdateTool,
+        BatchWorkflowsDeleteTool,
+        BatchWorkflowsActivateTool,
+        BatchWorkflowsDeactivateTool,
+        BatchOperationStatusTool
+      } = await import('../tools/batch/index.js');
+      
+      this.toolRegistry.register(new BatchWorkflowsCreateTool());
+      this.toolRegistry.register(new BatchWorkflowsUpdateTool());
+      this.toolRegistry.register(new BatchWorkflowsDeleteTool());
+      this.toolRegistry.register(new BatchWorkflowsActivateTool());
+      this.toolRegistry.register(new BatchWorkflowsDeactivateTool());
+      this.toolRegistry.register(new BatchOperationStatusTool());
     }
 
     // Update tool registry context

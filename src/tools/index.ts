@@ -17,3 +17,6 @@ export * from './monitoring/index.js';
 
 // Debug tools
 export * from './debug/index.js';
+
+// Batch tools
+export * from './batch/index.js';

@@ -35,11 +35,13 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "axios": "^1.10.0",
     "dotenv": "^16.5.0",
     "eventsource": "^4.0.0",
     "typescript": "^5.8.3",
+    "uuid": "^11.1.0",
     "ws": "^8.18.2",
     "zod": "^3.25.64"
   },
