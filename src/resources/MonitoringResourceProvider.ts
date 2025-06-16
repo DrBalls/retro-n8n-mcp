@@ -57,11 +57,12 @@ export class MonitoringResourceProvider implements IResourceProvider {
 
     try {
       // List active workflows for individual monitoring
-      const workflows = await this.apiClient.request('GET', '/workflows', {
-        params: { active: true, limit: 100 }
+      const workflowResponse = await this.apiClient.getWorkflows({
+        active: true,
+        limit: 100
       });
 
-      for (const workflow of workflows) {
+      for (const workflow of workflowResponse.data) {
         resources.push({
           uri: `monitoring://workflow/${workflow.id}/status`,
           name: `${workflow.name} - Status`,
@@ -78,14 +79,12 @@ export class MonitoringResourceProvider implements IResourceProvider {
       }
 
       // List recent executions for monitoring
-      const executions = await this.apiClient.request('GET', '/executions', {
-        params: { 
-          status: 'running',
-          limit: 20 
-        }
+      const executionResponse = await this.apiClient.getExecutions({
+        status: 'running',
+        limit: 20 
       });
 
-      for (const execution of executions) {
+      for (const execution of executionResponse.data) {
         resources.push({
           uri: `monitoring://execution/${execution.id}`,
           name: `Execution ${execution.id}`,
@@ -188,9 +187,9 @@ export class MonitoringResourceProvider implements IResourceProvider {
   private async getSystemStatus(): Promise<string> {
     try {
       const [version, executions, workflows] = await Promise.all([
-        this.apiClient.request('GET', '/version').catch(() => null),
-        this.apiClient.request('GET', '/executions', { params: { limit: 1 } }),
-        this.apiClient.request('GET', '/workflows', { params: { limit: 1 } })
+        this.apiClient.testConnection().then(r => r.version).catch(() => null),
+        this.apiClient.getExecutions({ limit: 1 }),
+        this.apiClient.getWorkflows({ limit: 1 })
       ]);
 
       const status = {
@@ -204,8 +203,8 @@ export class MonitoringResourceProvider implements IResourceProvider {
           monitoredWorkflows: []
         },
         stats: {
-          totalExecutions: executions.count || 0,
-          totalWorkflows: workflows.count || 0
+          totalExecutions: executions.count || executions.data?.length || 0,
+          totalWorkflows: workflows.count || workflows.data?.length || 0
         }
       };
 
@@ -224,14 +223,12 @@ export class MonitoringResourceProvider implements IResourceProvider {
    */
   private async getActiveExecutions(): Promise<string> {
     try {
-      const executions = await this.apiClient.request('GET', '/executions', {
-        params: {
-          status: 'running',
-          limit: 100
-        }
+      const executionResponse = await this.apiClient.getExecutions({
+        status: 'running',
+        limit: 100
       });
 
-      const activeExecutions = executions.map((exec: any) => ({
+      const activeExecutions = executionResponse.data.map((exec: any) => ({
         id: exec.id,
         workflowId: exec.workflowId,
         workflowName: exec.workflowData?.name,
@@ -259,20 +256,19 @@ export class MonitoringResourceProvider implements IResourceProvider {
    */
   private async getWorkflowMetrics(): Promise<string> {
     try {
-      const workflows = await this.apiClient.request('GET', '/workflows', {
-        params: { active: true, limit: 100 }
+      const workflowResponse = await this.apiClient.getWorkflows({
+        active: true,
+        limit: 100
       });
 
-      const metricsPromises = workflows.map(async (workflow: any) => {
-        const executions = await this.apiClient.request('GET', '/executions', {
-          params: {
-            workflowId: workflow.id,
-            limit: 50
-          }
+      const metricsPromises = workflowResponse.data.map(async (workflow: any) => {
+        const executionResponse = await this.apiClient.getExecutions({
+          workflowId: workflow.id,
+          limit: 50
         });
 
-        const successCount = executions.filter((e: any) => e.status === 'success').length;
-        const totalDuration = executions.reduce((sum: number, e: any) => {
+        const successCount = executionResponse.data.filter((e: any) => e.status === 'success').length;
+        const totalDuration = executionResponse.data.reduce((sum: number, e: any) => {
           if (e.startedAt && e.stoppedAt) {
             return sum + (new Date(e.stoppedAt).getTime() - new Date(e.startedAt).getTime());
           }
@@ -282,10 +278,10 @@ export class MonitoringResourceProvider implements IResourceProvider {
         return {
           workflowId: workflow.id,
           workflowName: workflow.name,
-          executionCount: executions.length,
-          successRate: executions.length > 0 ? (successCount / executions.length) * 100 : 0,
-          averageDuration: executions.length > 0 ? totalDuration / executions.length : 0,
-          lastExecution: executions[0]?.startedAt
+          executionCount: executionResponse.data.length,
+          successRate: executionResponse.data.length > 0 ? (successCount / executionResponse.data.length) * 100 : 0,
+          averageDuration: executionResponse.data.length > 0 ? totalDuration / executionResponse.data.length : 0,
+          lastExecution: executionResponse.data[0]?.startedAt
         };
       });
 
@@ -309,18 +305,16 @@ export class MonitoringResourceProvider implements IResourceProvider {
    */
   private async getWorkflowStatus(workflowId: string): Promise<string> {
     try {
-      const [workflow, recentExecutions] = await Promise.all([
-        this.apiClient.request('GET', `/workflows/${workflowId}`),
-        this.apiClient.request('GET', '/executions', {
-          params: {
-            workflowId,
-            limit: 10
-          }
+      const [workflow, executionResponse] = await Promise.all([
+        this.apiClient.getWorkflow(workflowId),
+        this.apiClient.getExecutions({
+          workflowId,
+          limit: 10
         })
       ]);
 
-      const runningExecutions = recentExecutions.filter((e: any) => e.status === 'running');
-      const lastExecution = recentExecutions[0];
+      const runningExecutions = executionResponse.data.filter((e: any) => e.status === 'running');
+      const lastExecution = executionResponse.data[0];
 
       return JSON.stringify({
         timestamp: new Date().toISOString(),
@@ -365,16 +359,14 @@ export class MonitoringResourceProvider implements IResourceProvider {
       }
 
       // Fallback to manual calculation
-      const executions = await this.apiClient.request('GET', '/executions', {
-        params: {
-          workflowId,
-          limit: 100
-        }
+      const executionResponse = await this.apiClient.getExecutions({
+        workflowId,
+        limit: 100
       });
 
-      const successCount = executions.filter((e: any) => e.status === 'success').length;
-      const failureCount = executions.filter((e: any) => e.status === 'error').length;
-      const totalDuration = executions.reduce((sum: number, e: any) => {
+      const successCount = executionResponse.data.filter((e: any) => e.status === 'success').length;
+      const failureCount = executionResponse.data.filter((e: any) => e.status === 'error').length;
+      const totalDuration = executionResponse.data.reduce((sum: number, e: any) => {
         if (e.startedAt && e.stoppedAt) {
           return sum + (new Date(e.stoppedAt).getTime() - new Date(e.startedAt).getTime());
         }
@@ -384,12 +376,12 @@ export class MonitoringResourceProvider implements IResourceProvider {
       return JSON.stringify({
         timestamp: new Date().toISOString(),
         workflowId,
-        executionCount: executions.length,
+        executionCount: executionResponse.data.length,
         successCount,
         failureCount,
-        successRate: executions.length > 0 ? (successCount / executions.length) * 100 : 0,
-        averageDuration: executions.length > 0 ? totalDuration / executions.length : 0,
-        lastExecution: executions[0]?.startedAt
+        successRate: executionResponse.data.length > 0 ? (successCount / executionResponse.data.length) * 100 : 0,
+        averageDuration: executionResponse.data.length > 0 ? totalDuration / executionResponse.data.length : 0,
+        lastExecution: executionResponse.data[0]?.startedAt
       }, null, 2);
     } catch (error) {
       return JSON.stringify({
@@ -404,9 +396,7 @@ export class MonitoringResourceProvider implements IResourceProvider {
    */
   private async getExecutionStatus(executionId: string): Promise<string> {
     try {
-      const execution = await this.apiClient.request('GET', `/executions/${executionId}`, {
-        params: { includeData: true }
-      });
+      const execution = await this.apiClient.getExecution(executionId);
 
       const nodeProgress = execution.data?.resultData?.runData ? 
         Object.keys(execution.data.resultData.runData).map((nodeId: string) => ({

@@ -471,9 +471,9 @@ export class Authorization {
   }
 
   /**
-   * Can access resource with advanced checks
+   * Can access resource with advanced checks including sharing and ownership
    */
-  canAccessResource(
+  canAccessAdvancedResource(
     context: {
       user?: IUser;
       resource?: {
