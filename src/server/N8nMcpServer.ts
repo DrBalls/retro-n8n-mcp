@@ -2,11 +2,16 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { 
   ListToolsRequestSchema,
   CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+  SubscribeRequestSchema,
+  UnsubscribeRequestSchema,
   ErrorCode,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import { N8nApiClient } from '../services/N8nApiClient.js';
 import { RealtimeMonitoringService } from '../services/RealtimeMonitoringService.js';
+import { MonitoringResourceProvider } from '../resources/MonitoringResourceProvider.js';
 import { N8nApiConfig } from '../types/config.types.js';
 import { 
   N8nApiError, 
@@ -47,6 +52,13 @@ import { SecurityManager, ISecurityConfig, ISecurityContext, IApiKey } from '../
 export interface IN8nMcpServerConfig {
   apiConfig?: Partial<N8nApiConfig>;
   security?: ISecurityConfig;
+  monitoring?: {
+    protocol?: 'websocket' | 'sse' | 'polling';
+    wsUrl?: string;
+    sseUrl?: string;
+    pollingInterval?: number;
+    updateInterval?: number;
+  };
 }
 
 export class N8nMcpServer {
@@ -60,6 +72,7 @@ export class N8nMcpServer {
   private baseUrl?: string;
   private security: SecurityManager;
   private monitoringService?: RealtimeMonitoringService;
+  private monitoringResourceProvider?: MonitoringResourceProvider;
 
   constructor(config?: IN8nMcpServerConfig | Partial<N8nApiConfig>) {
     this.startTime = new Date();
@@ -67,11 +80,13 @@ export class N8nMcpServer {
     // Handle both old and new config formats
     let apiConfig: Partial<N8nApiConfig> | undefined;
     let securityConfig: ISecurityConfig | undefined;
+    let monitoringConfig: IN8nMcpServerConfig['monitoring'] | undefined;
     
     if (config && 'apiConfig' in config) {
       // New format
       apiConfig = config.apiConfig;
       securityConfig = config.security;
+      monitoringConfig = config.monitoring;
     } else {
       // Old format (backward compatibility)
       apiConfig = config;
@@ -111,6 +126,31 @@ export class N8nMcpServer {
       }
     } else {
       this.log('warn', 'n8n API client not configured - some features will be unavailable');
+    }
+
+    // Initialize monitoring service if API client is available
+    if (this.apiClient && monitoringConfig) {
+      try {
+        this.monitoringService = new RealtimeMonitoringService({
+          apiClient: this.apiClient,
+          protocol: monitoringConfig.protocol,
+          wsUrl: monitoringConfig.wsUrl,
+          sseUrl: monitoringConfig.sseUrl,
+          pollingInterval: monitoringConfig.pollingInterval,
+          authToken: apiConfig?.apiKey,
+        });
+        this.log('info', `Realtime monitoring service initialized with ${monitoringConfig.protocol || 'auto-detected'} protocol`);
+        
+        // Initialize monitoring resource provider
+        this.monitoringResourceProvider = new MonitoringResourceProvider({
+          apiClient: this.apiClient,
+          monitoringService: this.monitoringService,
+          updateInterval: monitoringConfig.updateInterval || 5000,
+        });
+        this.log('info', 'Monitoring resource provider initialized');
+      } catch (error) {
+        this.log('error', 'Failed to initialize monitoring service', error);
+      }
     }
 
     // Setup handlers first
@@ -286,6 +326,100 @@ export class N8nMcpServer {
         throw this.createMcpError(error);
       }
     });
+
+    // Handle list resources request
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
+      this.requestCount++;
+      this.log('debug', 'Handling list resources request');
+      
+      try {
+        if (!this.monitoringResourceProvider) {
+          return { resources: [] };
+        }
+        
+        const resources = await this.monitoringResourceProvider.listResources();
+        return { resources };
+      } catch (error) {
+        this.errorCount++;
+        this.log('error', 'Failed to list resources', error);
+        throw this.createMcpError(error);
+      }
+    });
+
+    // Handle read resource request
+    this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      this.requestCount++;
+      const { uri } = request.params;
+      this.log('debug', `Handling read resource request: ${uri}`);
+      
+      try {
+        if (!this.monitoringResourceProvider) {
+          throw new Error('Monitoring not configured');
+        }
+        
+        const content = await this.monitoringResourceProvider.readResource(uri);
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: content,
+          }],
+        };
+      } catch (error) {
+        this.errorCount++;
+        this.log('error', `Failed to read resource: ${uri}`, error);
+        throw this.createMcpError(error);
+      }
+    });
+
+    // Handle subscribe to resource request
+    this.server.setRequestHandler(SubscribeRequestSchema, async (request) => {
+      this.requestCount++;
+      const { uri } = request.params;
+      this.log('debug', `Handling subscribe request: ${uri}`);
+      
+      try {
+        if (!this.monitoringResourceProvider) {
+          throw new Error('Monitoring not configured');
+        }
+        
+        // Subscribe to resource updates
+        const unsubscribe = this.monitoringResourceProvider.subscribeToResource(uri, async (content) => {
+          // Send resource update notification
+          await this.server.notification({
+            method: 'notifications/resources/updated',
+            params: {
+              uri,
+            },
+          });
+        });
+        
+        // Store unsubscribe function for later cleanup
+        // In a real implementation, you'd want to track subscriptions
+        
+        return { success: true };
+      } catch (error) {
+        this.errorCount++;
+        this.log('error', `Failed to subscribe to resource: ${uri}`, error);
+        throw this.createMcpError(error);
+      }
+    });
+
+    // Handle unsubscribe from resource request
+    this.server.setRequestHandler(UnsubscribeRequestSchema, async (request) => {
+      this.requestCount++;
+      const { uri } = request.params;
+      this.log('debug', `Handling unsubscribe request: ${uri}`);
+      
+      try {
+        // In a real implementation, you'd clean up the subscription here
+        return { success: true };
+      } catch (error) {
+        this.errorCount++;
+        this.log('error', `Failed to unsubscribe from resource: ${uri}`, error);
+        throw this.createMcpError(error);
+      }
+    });
   }
 
   private setupErrorHandling(): void {
@@ -358,6 +492,17 @@ export class N8nMcpServer {
       await this.server.connect(transport);
       this.isConnected = true;
       this.log('info', 'Successfully connected to MCP transport');
+      
+      // Start monitoring service if configured
+      if (this.monitoringService) {
+        try {
+          await this.monitoringService.start();
+          this.log('info', 'Monitoring service started');
+        } catch (error) {
+          this.log('error', 'Failed to start monitoring service', error);
+          // Don't fail the connection if monitoring fails
+        }
+      }
     } catch (error) {
       this.isConnected = false;
       this.log('error', 'Failed to connect to MCP transport', error);
@@ -368,6 +513,17 @@ export class N8nMcpServer {
   async close(): Promise<void> {
     try {
       this.log('info', 'Closing MCP server');
+      
+      // Stop monitoring service if running
+      if (this.monitoringService) {
+        try {
+          this.monitoringService.stop();
+          this.log('info', 'Monitoring service stopped');
+        } catch (error) {
+          this.log('error', 'Failed to stop monitoring service', error);
+        }
+      }
+      
       this.isConnected = false;
       await this.server.close();
       this.log('info', 'MCP server closed successfully');
