@@ -11,6 +11,8 @@ A comprehensive Model Context Protocol (MCP) server for n8n that provides full a
 - **Real-time Monitoring**: WebSocket/SSE support for live updates
 - **Interactive Debugging**: Step-through execution with breakpoints
 - **AI-Powered Features**: Natural language workflow generation and optimization
+- **Comprehensive Monitoring**: Metrics, health checks, analytics, alerts, SLOs, and distributed tracing
+- **Dashboard APIs**: Build custom monitoring dashboards with real-time data
 
 ## Installation
 
@@ -94,6 +96,14 @@ await server.connect(transport);
 - `batch_workflows_delete` - Delete multiple workflows
 - `batch_operation_status` - Check batch operation status
 
+### Monitoring & Analytics (NEW)
+- `monitoring_overview` - Get comprehensive system status
+- `metrics_query` - Query performance metrics
+- `health_status` - Check system and dependency health
+- `analytics_query` - Query usage analytics and insights
+- `alert_status` - Manage alerts and notifications
+- `slo_status` - Track service level objectives
+
 ## Development
 
 ```bash
@@ -128,6 +138,7 @@ The server follows a modular architecture:
 ### Getting Started
 - [Getting Started Guide](docs/getting-started.md) - Quick start guide for new users
 - [Tool Reference](docs/tool-reference.md) - Complete reference for all 60+ tools
+- [Monitoring Guide](docs/monitoring-guide.md) - Comprehensive monitoring and analytics guide
 
 ### API Documentation
 - [TypeScript API Reference](docs/api/README.md) - Auto-generated API documentation
