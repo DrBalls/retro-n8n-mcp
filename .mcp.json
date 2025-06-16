@@ -69,13 +69,6 @@
         "OPENAI_API_KEY": "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"
       }
     },
-    "blender": {
-      "command": "bash",
-      "args": [
-        "-c",
-        "cd /home/wes && export BLENDER_HOST=10.255.255.254 && export BLENDER_PORT=9876 && export DISPLAY=:0 && /home/wes/mcp-venv/bin/python /home/wes/blender-mcp-wsl-patched.py"
-      ]
-    },
     "magic-ui": {
       "command": "npx",
       "args": [
@@ -123,22 +116,13 @@
         "-m",
         "mcp.server.fastmcp",
         "--dir",
-        "/home/wes/retro-core",
+        "/home/wes/retro-n8n-mcp",
         "--python-path",
         "python3"
       ],
       "env": {
         "MCP_ALLOW_SYSTEM_ACCESS": "0"
       }
-    },
-    "hf-mcp-server": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://huggingface.co/mcp",
-        "--header",
-        "Authorization: Bearer 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"
-      ]
     },
     "pytest-mcp-server": {
       "command": "npx",
@@ -148,6 +132,16 @@
       ],
       "env": {
         "DATA_DIR": "/mnt/e/GIT Reps/servers/shared/pytest-data"
+      }
+    },
+    "perplexity-ask": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "perplexity-ask-mcp"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "pplx-ZlBFmYLDf2f2cEcTgY59SQcobbGqWoPzwXRVuuC7wIQXtWDaEnglish"
       }
     }
   }
