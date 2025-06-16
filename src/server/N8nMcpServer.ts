@@ -6,6 +6,7 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import { N8nApiClient } from '../services/N8nApiClient.js';
+import { RealtimeMonitoringService } from '../services/RealtimeMonitoringService.js';
 import { N8nApiConfig } from '../types/config.types.js';
 import { 
   N8nApiError, 
@@ -58,6 +59,7 @@ export class N8nMcpServer {
   private errorCount = 0;
   private baseUrl?: string;
   private security: SecurityManager;
+  private monitoringService?: RealtimeMonitoringService;
 
   constructor(config?: IN8nMcpServerConfig | Partial<N8nApiConfig>) {
     this.startTime = new Date();
@@ -111,15 +113,17 @@ export class N8nMcpServer {
       this.log('warn', 'n8n API client not configured - some features will be unavailable');
     }
 
-    // Register tools
-    this.registerTools();
-    
-    // Setup handlers
+    // Setup handlers first
     this.setupHandlers();
     this.setupErrorHandling();
+    
+    // Register tools (async)
+    this.registerTools().catch(error => {
+      this.log('error', 'Failed to register tools', error);
+    });
   }
 
-  private registerTools(): void {
+  private async registerTools(): Promise<void> {
     // Always register system tools
     this.toolRegistry.register(new ServerHealthTool());
     
@@ -152,6 +156,12 @@ export class N8nMcpServer {
       this.toolRegistry.register(new ListCredentialsTool());
       this.toolRegistry.register(new TestCredentialTool());
       this.toolRegistry.register(new GetCredentialTool());
+      
+      // Monitoring tools - register after checking for monitoring service
+      // These tools will work with polling fallback if no monitoring service is configured
+      const { RealtimeExecutionMonitorTool, WorkflowMetricsMonitorTool } = await import('../tools/monitoring/index.js');
+      this.toolRegistry.register(new RealtimeExecutionMonitorTool());
+      this.toolRegistry.register(new WorkflowMetricsMonitorTool());
     }
 
     // Update tool registry context
@@ -170,6 +180,7 @@ export class N8nMcpServer {
   private updateToolContext(): void {
     const context: IToolContext = {
       apiClient: this.apiClient || undefined,
+      monitoringService: this.monitoringService,
       metadata: {
         version: '0.1.0',
         uptime: this.getUptime(),

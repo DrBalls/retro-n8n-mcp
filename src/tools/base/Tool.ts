@@ -55,6 +55,11 @@ export interface IToolContext {
   apiClient?: any; // Will be N8nApiClient
 
   /**
+   * Real-time monitoring service instance (if available)
+   */
+  monitoringService?: any; // Will be RealtimeMonitoringService
+
+  /**
    * Request ID for tracing
    */
   requestId?: string;
