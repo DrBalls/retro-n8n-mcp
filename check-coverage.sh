@@ -2,7 +2,7 @@
 
 # Run tests excluding monitoring tests which cause timeouts
 echo "Running tests (excluding monitoring tests)..."
-npm test -- --run --exclude="**/monitoring/**" --coverage --reporter=json 2>/dev/null
+npm test -- --run --exclude="tests/tools/monitoring/**" --coverage --reporter=json 2>/dev/null
 
 # Extract coverage from JSON
 if [ -f coverage/coverage-final.json ]; then
