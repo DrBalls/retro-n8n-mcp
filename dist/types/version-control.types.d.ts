@@ -445,9 +445,9 @@ export declare const WorkflowBranchSchema: z.ZodObject<{
     id: string;
     workflowId: string;
     updatedAt: string;
-    isActive: boolean;
     baseVersionId: string;
     headVersionId: string;
+    isActive: boolean;
     isMerged: boolean;
     description?: string | undefined;
     mergedAt?: string | undefined;

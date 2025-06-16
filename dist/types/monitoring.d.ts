@@ -369,25 +369,25 @@ export declare const AnalyticsEventSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     timestamp: Date;
     event: string;
+    properties?: Record<string, any> | undefined;
+    userId?: string | undefined;
+    sessionId?: string | undefined;
     context?: {
         ip?: string | undefined;
         userAgent?: string | undefined;
         referrer?: string | undefined;
     } | undefined;
-    properties?: Record<string, any> | undefined;
-    userId?: string | undefined;
-    sessionId?: string | undefined;
 }, {
     timestamp: Date;
     event: string;
+    properties?: Record<string, any> | undefined;
+    userId?: string | undefined;
+    sessionId?: string | undefined;
     context?: {
         ip?: string | undefined;
         userAgent?: string | undefined;
         referrer?: string | undefined;
     } | undefined;
-    properties?: Record<string, any> | undefined;
-    userId?: string | undefined;
-    sessionId?: string | undefined;
 }>;
 export declare const AlertSchema: z.ZodObject<{
     id: z.ZodString;

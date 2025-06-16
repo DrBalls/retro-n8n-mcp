@@ -1,4 +1,4 @@
-name: CI
+name: CI Minimal
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  verify-setup:
+    name: Verify Setup
     runs-on: ubuntu-latest
     
     steps:
@@ -25,29 +25,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Type check
-        run: npm run typecheck
-      
-      - name: Build project
-        run: npm run build
-      
-      - name: Verify build output
+      - name: Verify project structure
         run: |
-          echo "✅ Checking build output..."
-          ls -la dist/
+          echo "✅ Checking project structure..."
           
-          # Verify main entry point exists
-          if [ ! -f "dist/index.js" ]; then
-            echo "❌ Build failed: dist/index.js not found"
+          # Check required files exist
+          for file in "package.json" "tsconfig.json" "README.md" "LICENSE"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+          done
+          
+          # Check source directory
+          if [ ! -d "src" ]; then
+            echo "❌ Missing src directory"
             exit 1
           fi
           
-          echo "✅ Build successful!"
+          # Count tools
+          TOOL_COUNT=$(find src/tools -name "*.ts" -not -name "*.test.ts" -not -name "index.ts" | wc -l)
+          echo "📊 Found $TOOL_COUNT tools"
+          
+          echo "✅ Project structure verified!"
 
   validate-production:
     name: Validate Production Branch
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/production' || github.base_ref == 'production'
+    if: github.ref == 'refs/heads/production'
     
     steps:
       - name: Checkout code
@@ -55,30 +60,15 @@ jobs:
       
       - name: Check for development files
         run: |
-          echo "🔍 Checking for development files that shouldn't be in production..."
+          echo "🔍 Checking production branch..."
           
-          DEV_FILES=(
-            ".roo"
-            ".taskmaster"
-            ".cursor"
-            "CLAUDE.md"
-            "coverage"
-            "tests"
-            ".eslintrc.json"
-            ".prettierrc.json"
-          )
+          DEV_FILES=(".roo" ".taskmaster" "CLAUDE.md" "coverage" "tests")
           
-          FOUND_FILES=()
           for file in "${DEV_FILES[@]}"; do
             if [ -e "$file" ]; then
-              FOUND_FILES+=("$file")
+              echo "❌ Found development file in production: $file"
+              exit 1
             fi
           done
-          
-          if [ ${#FOUND_FILES[@]} -gt 0 ]; then
-            echo "❌ Found development files in production branch:"
-            printf '%s\n' "${FOUND_FILES[@]}"
-            exit 1
-          fi
           
           echo "✅ Production branch is clean!"

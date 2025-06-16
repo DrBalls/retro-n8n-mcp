@@ -21,7 +21,7 @@ export class MonitoringResourceProvider implements IResourceProvider {
 
   constructor(options: IMonitoringResourceOptions) {
     this.apiClient = options.apiClient;
-    this.monitoringService = options.monitoringService;
+    this.monitoringService = options.monitoringService!;
     this.updateInterval = options.updateInterval || 5000;
   }
 

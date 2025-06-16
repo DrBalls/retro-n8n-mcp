@@ -68,7 +68,7 @@ export class VersionDiffTool extends BaseTool {
                         branch: toVersion.branchName,
                     },
                     timespan: {
-                        days: Math.floor((toVersion.createdAt - fromVersion.createdAt) / (1000 * 60 * 60 * 24)),
+                        days: Math.floor((new Date(toVersion.createdAt).getTime() - new Date(fromVersion.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
                         direction: toVersion.createdAt > fromVersion.createdAt ? 'forward' : 'backward',
                     },
                 },

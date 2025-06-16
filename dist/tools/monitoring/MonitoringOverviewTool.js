@@ -89,8 +89,8 @@ export class MonitoringOverviewTool extends BaseTool {
         if (sections.includes('analytics')) {
             const analyticsStats = monitoring.analytics.getEventStats();
             overview.analytics = {
-                summary: analyticsStats.summary,
-                topEvents: analyticsStats.topEvents.slice(0, 5)
+                summary: analyticsStats['summary'],
+                topEvents: analyticsStats['topEvents'].slice(0, 5)
             };
         }
         // Telemetry section

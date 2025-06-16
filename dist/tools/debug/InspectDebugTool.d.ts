@@ -20,7 +20,7 @@ export declare class InspectDebugTool extends BaseTool {
         }>>;
     }, "strip", z.ZodTypeAny, {
         sessionId: string;
-        inspectType: "all" | "node" | "state" | "timeline" | "variable";
+        inspectType: "all" | "node" | "variable" | "timeline" | "state";
         timeRange?: {
             start?: string | undefined;
             end?: string | undefined;
@@ -34,7 +34,7 @@ export declare class InspectDebugTool extends BaseTool {
             end?: string | undefined;
         } | undefined;
         nodeId?: string | undefined;
-        inspectType?: "all" | "node" | "state" | "timeline" | "variable" | undefined;
+        inspectType?: "all" | "node" | "variable" | "timeline" | "state" | undefined;
         variableName?: string | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;

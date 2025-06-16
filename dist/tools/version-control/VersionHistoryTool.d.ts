@@ -28,18 +28,18 @@ export declare class VersionHistoryTool extends BaseTool {
         includeTags: boolean;
         includeChanges: boolean;
         branch?: string | undefined;
-        until?: number | undefined;
         author?: string | undefined;
         since?: number | undefined;
+        until?: number | undefined;
     }, {
         workflowId: string;
         limit?: number | undefined;
         offset?: number | undefined;
         branch?: string | undefined;
-        until?: number | undefined;
         format?: "summary" | "detailed" | "oneline" | undefined;
         author?: string | undefined;
         since?: number | undefined;
+        until?: number | undefined;
         includeTags?: boolean | undefined;
         includeChanges?: boolean | undefined;
     }>;
