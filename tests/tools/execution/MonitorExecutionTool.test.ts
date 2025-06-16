@@ -115,7 +115,7 @@ describe('MonitorExecutionTool', () => {
         .mockResolvedValueOnce(completedExecution);
 
       const result = await tool.execute(
-        { executionId: '123', pollInterval: 100 },
+        { executionId: '123', pollInterval: 500 },
         { apiClient: mockApiClient }
       );
 
@@ -144,6 +144,7 @@ describe('MonitorExecutionTool', () => {
         status: 'error',
         data: {
           resultData: {
+            runData: {},
             error: {
               message: 'Node execution failed',
               node: 'HTTP Request'
@@ -169,13 +170,15 @@ describe('MonitorExecutionTool', () => {
         id: '123',
         workflowId: 'wf-456',
         finished: false,
+        mode: 'manual',
+        startedAt: '2024-01-15T10:00:00.000Z',
         status: 'running'
       };
 
       mockApiClient.request.mockResolvedValue(runningExecution);
 
       const result = await tool.execute(
-        { executionId: '123', pollInterval: 100, maxDuration: 1000 },
+        { executionId: '123', pollInterval: 500, maxDuration: 1000 },
         { apiClient: mockApiClient }
       );
 
@@ -195,12 +198,19 @@ describe('MonitorExecutionTool', () => {
 
     it('should handle API errors during monitoring', async () => {
       mockApiClient.request
-        .mockResolvedValueOnce({ id: '123', finished: false, status: 'running' })
+        .mockResolvedValueOnce({ 
+          id: '123', 
+          workflowId: 'wf-456',
+          finished: false, 
+          mode: 'manual',
+          startedAt: '2024-01-15T10:00:00.000Z',
+          status: 'running' 
+        })
         .mockRejectedValueOnce(new Error('API Error'));
 
       await expect(
         tool.execute(
-          { executionId: '123', pollInterval: 100 },
+          { executionId: '123', pollInterval: 500 },
           { apiClient: mockApiClient }
         )
       ).rejects.toThrow('API Error');
@@ -211,9 +221,12 @@ describe('MonitorExecutionTool', () => {
         id: '123',
         workflowId: 'wf-456',
         finished: false,
+        mode: 'manual',
+        startedAt: '2024-01-15T10:00:00.000Z',
         status: 'running',
         data: {
           executionData: {
+            contextData: {},
             nodeExecutionStack: [
               { node: 'HTTP Request', data: {} },
               { node: 'Set', data: {} }
@@ -232,13 +245,19 @@ describe('MonitorExecutionTool', () => {
         ...executionWithProgress,
         finished: true,
         status: 'success',
+        stoppedAt: '2024-01-15T10:00:05.000Z',
         data: {
+          executionData: {
+            contextData: {},
+            nodeExecutionStack: []
+          },
           resultData: {
             runData: {
               'Start': [{ executionTime: 5 }],
               'HTTP Request': [{ executionTime: 100 }],
               'Set': [{ executionTime: 20 }]
-            }
+            },
+            lastNodeExecuted: 'Set'
           }
         }
       };
@@ -248,7 +267,7 @@ describe('MonitorExecutionTool', () => {
         .mockResolvedValueOnce(completedExecution);
 
       const result = await tool.execute(
-        { executionId: '123', pollInterval: 100 },
+        { executionId: '123', pollInterval: 500 },
         { apiClient: mockApiClient }
       );
 

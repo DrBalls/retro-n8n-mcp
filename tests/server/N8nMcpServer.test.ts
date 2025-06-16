@@ -128,7 +128,7 @@ describe('N8nMcpServer', () => {
       const response = await client.listTools();
       
       expect(response.tools).toBeDefined();
-      expect(response.tools.length).toBe(21); // 9 original + 6 execution + 6 credential tools
+      expect(response.tools.length).toBe(23); // 9 original + 6 execution + 6 credential + 2 monitoring tools
       
       const toolNames = response.tools.map(tool => tool.name);
       

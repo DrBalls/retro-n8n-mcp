@@ -49,7 +49,7 @@ describe('N8nMcpServer Execution Tools', () => {
     // Check that all execution tools are present
     const executionTools = tools.filter(tool => tool.name.includes('execution'));
     
-    expect(executionTools).toHaveLength(6);
+    expect(executionTools).toHaveLength(7); // Including monitor_execution_realtime
     
     const toolNames = executionTools.map(t => t.name);
     expect(toolNames).toContain('trigger_execution');
