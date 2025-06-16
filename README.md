@@ -80,6 +80,20 @@ await server.connect(transport);
 - `credential_test` - Test credential validity
 - `credential_list` - List available credentials
 
+### Version Control (NEW)
+- `version_create` - Create workflow versions with semantic versioning
+- `version_history` - View workflow version history
+- `version_diff` - Compare workflow versions
+- `version_rollback` - Rollback to previous versions
+- `branch_create` - Create development branches
+- `branch_merge` - Merge branches with conflict detection
+
+### Batch Operations
+- `batch_workflows_create` - Create multiple workflows
+- `batch_workflows_update` - Update multiple workflows
+- `batch_workflows_delete` - Delete multiple workflows
+- `batch_operation_status` - Check batch operation status
+
 ## Development
 
 ```bash
@@ -108,6 +122,12 @@ The server follows a modular architecture:
 - `src/services/` - Business logic and n8n API integration
 - `src/utils/` - Utility functions
 - `src/types/` - TypeScript type definitions
+
+## Documentation
+
+- [Version Control Guide](docs/version-control-guide.md) - Comprehensive guide to Git-like version control for workflows
+- [Version Control Quick Reference](docs/version-control-quick-reference.md) - Quick command reference
+- [Workflow Patterns](docs/version-control-workflow-patterns.md) - Common development patterns and best practices
 
 ## Contributing
 
