@@ -2,9 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 PROTOCOL VERSION: v1.4 (January 15, 2025)
+## 📋 PROTOCOL VERSION: v1.5 (January 17, 2025)
 
 ### Protocol Changelog:
+- **v1.5** (January 17, 2025): Real-time monitoring integration and session recovery
+  - Added: Session recovery protocol for crashed/interrupted sessions
+  - Added: Real-time monitoring integration steps in common patterns
+  - Added: Integration test patterns for new features
+  - Modified: Enhanced error handling for TaskMaster file location issues
 - **v1.4** (January 15, 2025): Test coverage improvements and gitignore updates
   - Added: Coverage check command in quick commands section
   - Added: Note about .gitignore for coverage files in development setup
@@ -34,6 +39,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 🎯 SESSION START PROTOCOL
 
 **MANDATORY**: At the beginning of EVERY session, you MUST:
+
+### For Resumed/Crashed Sessions:
+If the session includes a previous conversation summary or context:
+1. **Acknowledge the continuation** with a brief status check
+2. **Review the summary** to understand what was being worked on
+3. **Check current state** (git status, test status, task progress)
+4. **Continue from where the previous session left off**
+5. **Complete any interrupted commits or tasks**
+
+### For New Sessions:
 
 1. **Check Git Status**
    ```bash
@@ -503,6 +518,49 @@ const securityCheck = await securityManager.checkToolSecurity(
 2. Export it from the directory's `index.ts`
 3. Import in `src/server/N8nMcpServer.ts`
 4. Register in `registerTools()` method without constructor parameters
+
+### Real-time Monitoring Integration Pattern
+When adding monitoring features to the MCP server:
+
+```typescript
+// 1. Add monitoring config to server options
+export interface IN8nMcpServerConfig {
+  apiConfig?: Partial<N8nApiConfig>;
+  security?: ISecurityConfig;
+  monitoring?: {
+    protocol?: 'websocket' | 'sse' | 'polling';
+    wsUrl?: string;
+    sseUrl?: string;
+    pollingInterval?: number;
+    updateInterval?: number;
+  };
+}
+
+// 2. Initialize monitoring service in constructor
+if (this.apiClient && monitoringConfig) {
+  this.monitoringService = new RealtimeMonitoringService({
+    apiClient: this.apiClient,
+    protocol: monitoringConfig.protocol,
+    wsUrl: monitoringConfig.wsUrl,
+    sseUrl: monitoringConfig.sseUrl,
+    authToken: apiConfig?.apiKey,
+  });
+  
+  this.monitoringResourceProvider = new MonitoringResourceProvider({
+    apiClient: this.apiClient,
+    monitoringService: this.monitoringService,
+    updateInterval: monitoringConfig.updateInterval,
+  });
+}
+
+// 3. Add resource handlers for monitoring
+this.server.setRequestHandler(ListResourcesRequestSchema, async () => { /* ... */ });
+this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => { /* ... */ });
+this.server.setRequestHandler(SubscribeRequestSchema, async (request) => { /* ... */ });
+
+// 4. Manage lifecycle
+// Start on connect, stop on close
+```
 
 ## 🛠️ COMMON ISSUES & SOLUTIONS
 
