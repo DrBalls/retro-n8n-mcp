@@ -41,10 +41,10 @@ export class WorkflowMetricsMonitorTool extends BaseTool {
             });
             await monitoringService.start();
         }
+        const workflowIds = new Set();
         try {
             const metricsHistory = [];
             const startTime = Date.now();
-            const workflowIds = new Set();
             // Determine which workflows to monitor
             if (input.workflowId) {
                 workflowIds.add(input.workflowId);
@@ -65,7 +65,7 @@ export class WorkflowMetricsMonitorTool extends BaseTool {
                     });
                 }
                 catch (error) {
-                    this.logger.error('Failed to start monitoring for workflow', { workflowId, error });
+                    console.error('Failed to start monitoring for workflow', { workflowId, error });
                 }
             });
             await Promise.all(monitoringPromises);

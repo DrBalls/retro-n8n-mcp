@@ -14,11 +14,12 @@ export class WebSocketService extends EventEmitter {
     constructor(options) {
         super();
         this.options = {
-            reconnect: true,
-            reconnectInterval: 5000,
-            maxReconnectAttempts: 10,
-            pingInterval: 30000,
-            ...options
+            url: options.url,
+            reconnect: options.reconnect ?? true,
+            reconnectInterval: options.reconnectInterval ?? 5000,
+            maxReconnectAttempts: options.maxReconnectAttempts ?? 10,
+            pingInterval: options.pingInterval ?? 30000,
+            authToken: options.authToken
         };
     }
     /**

@@ -71,7 +71,7 @@ export class DebugSession extends EventEmitter {
     super();
     
     this.apiClient = apiClient;
-    this.variableCache = new SimpleCache<unknown>(300000); // 5 minute TTL
+    this.variableCache = new SimpleCache<unknown>({ defaultTtl: 300000 }); // 5 minute TTL
     
     this.session = {
       id: options.sessionId || this.generateSessionId(),

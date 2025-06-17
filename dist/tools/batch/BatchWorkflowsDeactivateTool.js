@@ -280,7 +280,7 @@ export class BatchWorkflowsDeactivateTool extends BaseTool {
             };
         }
         catch (error) {
-            this.logger.error('Batch workflow deactivation failed', { error });
+            console.error('Batch workflow deactivation failed', { error });
             return {
                 content: [{
                         type: 'text',

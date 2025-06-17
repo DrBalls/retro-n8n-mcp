@@ -198,7 +198,8 @@ export class BatchOperationStatusTool extends BaseTool {
       };
 
     } catch (error) {
-      this.logger.error('Failed to get batch operation status', { error });
+      // Log error if needed
+      console.error('Failed to get batch operation status', error);
       
       return {
         content: [{

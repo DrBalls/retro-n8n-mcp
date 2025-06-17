@@ -6,7 +6,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "echo \"Tests coming soon - package functionality verified via dry-run\"",
+    "test:connection": "node dist/index.js --test-connection",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "n8n",

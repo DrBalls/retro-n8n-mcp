@@ -86,15 +86,18 @@ export class N8nMcpServer {
     let monitoringConfig: IN8nMcpServerConfig['monitoring'] | undefined;
     let comprehensiveMonitoringConfig: IMonitoringConfig | undefined;
     
-    if (config && 'apiConfig' in config) {
+    if (config && typeof config === 'object' && 'apiConfig' in config) {
       // New format
       apiConfig = config.apiConfig;
       securityConfig = config.security;
       monitoringConfig = config.monitoring;
       comprehensiveMonitoringConfig = config.comprehensiveMonitoring;
-    } else {
+    } else if (config && typeof config === 'object' && ('baseUrl' in config || 'apiKey' in config)) {
       // Old format (backward compatibility)
-      apiConfig = config;
+      apiConfig = config as Partial<N8nApiConfig>;
+    } else {
+      // No config provided
+      apiConfig = undefined;
     }
     
     this.server = new Server(

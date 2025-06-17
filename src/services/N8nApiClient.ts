@@ -192,7 +192,7 @@ export class N8nApiClient {
     return tags;
   }
 
-  private async request<T>(
+  public async request<T>(
     method: string,
     path: string,
     options: {

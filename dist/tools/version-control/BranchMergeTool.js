@@ -66,8 +66,8 @@ export class BranchMergeTool extends BaseTool {
                             base: conflict.baseValue ? this.formatConflictValue(conflict.baseValue) : null,
                         },
                     })),
-                    resolutionRequired: mergeResult.manualResolutionRequired,
-                    autoResolved: mergeResult.autoResolved,
+                    resolutionRequired: mergeResult.conflicts.filter(c => !c.resolution).length,
+                    autoResolved: mergeResult.conflicts.filter(c => c.resolution === 'target' || c.resolution === 'source').length,
                     nextSteps: [
                         'Review conflicts and choose resolution strategy',
                         'Use "merge_resolve" tool to resolve conflicts',
@@ -96,9 +96,9 @@ export class BranchMergeTool extends BaseTool {
                     mergeVersionId: mergeResult.mergedWorkflow ? 'auto-generated' : null,
                 },
                 statistics: {
-                    conflictsDetected: mergeResult.conflictCount,
-                    autoResolved: mergeResult.autoResolved,
-                    manualResolution: mergeResult.manualResolutionRequired,
+                    conflictsDetected: mergeResult.conflicts.length,
+                    autoResolved: mergeResult.conflicts.filter(c => c.resolution === 'target' || c.resolution === 'source').length,
+                    manualResolution: mergeResult.conflicts.filter(c => !c.resolution).length,
                 },
                 actions: {
                     backupCreated: input.createBackup,

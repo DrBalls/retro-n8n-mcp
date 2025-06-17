@@ -139,7 +139,7 @@ export class BatchWorkflowsCreateTool extends BaseTool {
             if (batchOptions.atomic && finalStatus.status === 'rolled_back') {
                 response.rollback = {
                     reason: 'Atomic operation failed, all changes rolled back',
-                    rolledBackCount: response.results.created.filter((w) => finalStatus.items.find(i => i.result?.id === w.workflowId && i.status === 'rolled_back')).length,
+                    rolledBackCount: response.results.created.filter((w) => finalStatus.items.find((i) => i.result?.id === w.workflowId && i.status === 'rolled_back')).length,
                 };
             }
             // Add warnings if any
@@ -162,7 +162,7 @@ export class BatchWorkflowsCreateTool extends BaseTool {
             };
         }
         catch (error) {
-            this.logger.error('Batch workflow creation failed', { error });
+            console.error('Batch workflow creation failed', { error });
             // Try to get operation status for error details
             let operationError = 'Batch operation failed';
             if (error instanceof Error) {

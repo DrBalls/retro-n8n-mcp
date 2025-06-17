@@ -67,6 +67,28 @@ export class SimpleCache {
         return oldestKey;
     }
     // Get cache statistics
+    // Get all entries
+    entries() {
+        const validEntries = [];
+        const now = Date.now();
+        for (const [key, entry] of this.cache.entries()) {
+            if (now - entry.timestamp <= entry.ttl) {
+                validEntries.push([key, entry.value]);
+            }
+        }
+        return validEntries;
+    }
+    // Get all values
+    values() {
+        const validValues = [];
+        const now = Date.now();
+        for (const entry of this.cache.values()) {
+            if (now - entry.timestamp <= entry.ttl) {
+                validValues.push(entry.value);
+            }
+        }
+        return validValues;
+    }
     getStats() {
         const now = Date.now();
         const entries = Array.from(this.cache.entries()).map(([key, entry]) => ({

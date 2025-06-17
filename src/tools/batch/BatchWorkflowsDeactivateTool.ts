@@ -130,7 +130,7 @@ export class BatchWorkflowsDeactivateTool extends BaseTool {
         const stopResults = {
           stopped: 0,
           failed: 0,
-          errors: [],
+          errors: [] as any[],
         };
 
         for (const workflow of preCheckResults.runningExecutions) {
@@ -329,7 +329,7 @@ export class BatchWorkflowsDeactivateTool extends BaseTool {
       };
 
     } catch (error) {
-      this.logger.error('Batch workflow deactivation failed', { error });
+      console.error('Batch workflow deactivation failed', { error });
       
       return {
         content: [{

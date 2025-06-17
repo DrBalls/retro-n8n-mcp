@@ -284,10 +284,8 @@ export class SSEService extends EventEmitter {
    * Get EventSource implementation
    */
   private getEventSource(): typeof EventSource | null {
-    // Browser environment
-    if (typeof window !== 'undefined' && window.EventSource) {
-      return window.EventSource;
-    }
+    // Browser environment (not applicable for Node.js MCP server)
+    // Skip browser check since we're running in Node.js
 
     // Node.js environment - try to load polyfill
     if (typeof global !== 'undefined') {

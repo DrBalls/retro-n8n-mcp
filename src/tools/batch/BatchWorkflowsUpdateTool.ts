@@ -263,7 +263,7 @@ export class BatchWorkflowsUpdateTool extends BaseTool {
       };
 
     } catch (error) {
-      this.logger.error('Batch workflow update failed', { error });
+      console.error('Batch workflow update failed', { error });
       
       return {
         content: [{

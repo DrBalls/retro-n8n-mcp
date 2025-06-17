@@ -1,7 +1,7 @@
 import { SimpleCache } from '../utils/SimpleCache.js';
 import { MultiTierCacheManager } from './cache/MultiTierCacheManager.js';
 import { CacheConfig } from '../types/cache.types.js';
-import { N8nApiConfig } from '../types/config.types.js';
+import { N8nApiConfig, ApiRequestOptions } from '../types/config.types.js';
 import { Workflow, WorkflowListResponse, Execution, ExecutionListResponse, Credential, CredentialListResponse } from '../types/n8n.types.js';
 export declare class N8nApiClient {
     private axios;
@@ -15,7 +15,11 @@ export declare class N8nApiClient {
     private executeWithRetry;
     private getCacheKey;
     private generateCacheTags;
-    private request;
+    request<T>(method: string, path: string, options?: {
+        data?: unknown;
+        params?: unknown;
+        requestOptions?: ApiRequestOptions;
+    }): Promise<T>;
     testConnection(): Promise<{
         connected: boolean;
         version?: string;

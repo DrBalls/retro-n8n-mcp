@@ -14,7 +14,7 @@ export class WorkflowDiffer {
             toVersionId: toWorkflow.id || 'unknown',
             operations: operations.map(this.convertToVersionDiffOperation),
             summary,
-            generatedAt: Date.now(),
+            generatedAt: new Date().toISOString(),
         };
     }
     /**
@@ -209,6 +209,16 @@ export class WorkflowDiffer {
         return str.replace(/~/g, '~0').replace(/\//g, '~1');
     }
     convertToVersionDiffOperation(op) {
+        // Filter out 'test' operations which are not part of our DiffOperation type
+        if (op.op === 'test') {
+            return {
+                operation: 'add', // Convert test to add for compatibility
+                path: op.path,
+                value: op.value,
+                oldValue: undefined,
+                from: undefined,
+            };
+        }
         return {
             operation: op.op,
             path: op.path,

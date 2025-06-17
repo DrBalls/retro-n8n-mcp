@@ -8,7 +8,7 @@ export class DebugSession extends EventEmitter {
     constructor(options, apiClient) {
         super();
         this.apiClient = apiClient;
-        this.variableCache = new SimpleCache(300000); // 5 minute TTL
+        this.variableCache = new SimpleCache({ defaultTtl: 300000 }); // 5 minute TTL
         this.session = {
             id: options.sessionId || this.generateSessionId(),
             workflowId: options.workflowId,

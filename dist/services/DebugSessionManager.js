@@ -11,7 +11,7 @@ export class DebugSessionManager extends EventEmitter {
         super();
         this.apiClient = apiClient;
         this.sessions = new Map();
-        this.sessionCache = new SimpleCache(3600000); // 1 hour TTL
+        this.sessionCache = new SimpleCache({ defaultTtl: 3600000 }); // 1 hour TTL
         this.options = {
             maxSessions: options.maxSessions || 10,
             sessionTimeout: options.sessionTimeout || 3600000, // 1 hour
@@ -189,7 +189,7 @@ export class DebugSessionManager extends EventEmitter {
         return {
             totalSessions: allSessions.length,
             activeSessions,
-            cachedSessions: this.sessionCache.size(),
+            cachedSessions: this.sessionCache.size,
             averageSessionDuration: averageDuration,
             averageBreakpointsPerSession: averageBreakpoints,
             averageTimelineEventsPerSession: averageTimeline,

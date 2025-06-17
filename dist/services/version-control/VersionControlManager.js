@@ -91,8 +91,8 @@ export class VersionControlManager {
             headVersionId: '', // Will be set after first version
             isActive: true,
             isMerged: false,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
         // Create initial version
         const initialVersion = {
@@ -106,7 +106,7 @@ export class VersionControlManager {
             commitMessage: 'Initial version',
             author: 'system',
             tags: [],
-            createdAt: Date.now(),
+            createdAt: new Date().toISOString(),
             isSnapshot: false,
         };
         // Update branch references
@@ -157,7 +157,7 @@ export class VersionControlManager {
             commitMessage: message,
             author,
             tags: tags.map(tag => ({ name: tag })),
-            createdAt: Date.now(),
+            createdAt: new Date().toISOString(),
             isSnapshot,
         };
         await this.storage.saveVersion(workflowVersion);
@@ -205,8 +205,8 @@ export class VersionControlManager {
             isActive: true,
             isMerged: false,
             createdBy: author,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
         await this.storage.saveBranch(newBranch);
         this.logger.info('Branch created successfully', {
@@ -245,7 +245,7 @@ export class VersionControlManager {
         if (canFastForward && strategy === 'auto') {
             // Fast-forward merge
             target.headVersionId = source.headVersionId;
-            target.updatedAt = Date.now();
+            target.updatedAt = new Date().toISOString();
             await this.storage.saveBranch(target);
             const result = {
                 id: generateId(),
@@ -256,8 +256,8 @@ export class VersionControlManager {
                 hasConflicts: false,
                 isAutoMergeable: true,
                 mergeStrategy: 'auto',
-                createdAt: Date.now(),
-                mergedAt: Date.now(),
+                createdAt: new Date().toISOString(),
+                mergedAt: new Date().toISOString(),
             };
             this.logger.info('Fast-forward merge completed', { workflowId, mergeId: result.id });
             return result;
@@ -274,9 +274,9 @@ export class VersionControlManager {
             hasConflicts: mergeResult.conflicts.length > 0,
             isAutoMergeable: mergeResult.conflicts.length === 0,
             mergeStrategy: strategy,
-            createdAt: Date.now(),
-            resolvedAt: mergeResult.conflicts.length === 0 ? Date.now() : undefined,
-            mergedAt: mergeResult.conflicts.length === 0 ? Date.now() : undefined,
+            createdAt: new Date().toISOString(),
+            resolvedAt: mergeResult.conflicts.length === 0 ? new Date().toISOString() : undefined,
+            mergedAt: mergeResult.conflicts.length === 0 ? new Date().toISOString() : undefined,
         };
         // If merge is successful, create merge commit
         if (!result.hasConflicts && result.mergedWorkflow) {
@@ -288,7 +288,7 @@ export class VersionControlManager {
             });
             // Mark source branch as merged
             source.isMerged = true;
-            source.mergedAt = Date.now();
+            source.mergedAt = new Date().toISOString();
             await this.storage.saveBranch(source);
             this.logger.info('Merge completed successfully', {
                 workflowId,
@@ -356,13 +356,15 @@ export class VersionControlManager {
             versions = versions.filter(v => v.author === author);
         }
         if (since) {
-            versions = versions.filter(v => v.createdAt >= since);
+            const sinceDate = new Date(since).toISOString();
+            versions = versions.filter(v => v.createdAt >= sinceDate);
         }
         if (until) {
-            versions = versions.filter(v => v.createdAt <= until);
+            const untilDate = new Date(until).toISOString();
+            versions = versions.filter(v => v.createdAt <= untilDate);
         }
         // Sort by creation time (newest first)
-        versions.sort((a, b) => b.createdAt - a.createdAt);
+        versions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         // Apply pagination
         return versions.slice(offset, offset + limit);
     }
@@ -383,7 +385,7 @@ export class VersionControlManager {
         const branch = branches.find(b => b.name === branchName);
         if (branch) {
             branch.headVersionId = versionId;
-            branch.updatedAt = Date.now();
+            branch.updatedAt = new Date().toISOString();
             await this.storage.saveBranch(branch);
         }
     }
@@ -395,7 +397,7 @@ export class VersionControlManager {
             oldValue: op.oldValue,
             newValue: op.value,
             description: `${op.operation} at ${op.path}`,
-            timestamp: Date.now(),
+            timestamp: new Date().toISOString(),
         }));
     }
     mapOperationToChangeType(operation) {

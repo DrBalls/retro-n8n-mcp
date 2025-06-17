@@ -271,7 +271,7 @@ export class BatchWorkflowsDeleteTool extends BaseTool {
       };
 
     } catch (error) {
-      this.logger.error('Batch workflow deletion failed', { error });
+      console.error('Batch workflow deletion failed', { error });
       
       return {
         content: [{

@@ -132,7 +132,7 @@ export class ErrorHandler {
         alternativeAction: async () => {
           // Could suggest corrections based on validation errors
           if (error.errors && error.errors.length > 0) {
-            this.logger.info('Validation errors:', error.errors);
+            this.logger.info('Validation errors:', { errors: error.errors });
           }
         }
       };

@@ -301,7 +301,7 @@ export class BatchWorkflowsActivateTool extends BaseTool {
       };
 
     } catch (error) {
-      this.logger.error('Batch workflow activation failed', { error });
+      console.error('Batch workflow activation failed', { error });
       
       return {
         content: [{

@@ -10,7 +10,7 @@ export class RealtimeMonitoringService extends EventEmitter {
     sseService;
     pollingTimers = new Map();
     monitoredExecutions = new Map();
-    metricsCache = new SimpleCache(300000); // 5 min cache
+    metricsCache = new SimpleCache({ defaultTtl: 300000 }); // 5 min cache
     logger = new Logger('RealtimeMonitoring');
     constructor(options) {
         super();

@@ -45,7 +45,7 @@ export class RealtimeMonitoringService extends EventEmitter {
   private sseService?: SSEService;
   private pollingTimers = new Map<string, NodeJS.Timeout>();
   private monitoredExecutions = new Map<string, any>();
-  private metricsCache = new SimpleCache<IWorkflowMetrics>(300000); // 5 min cache
+  private metricsCache = new SimpleCache<IWorkflowMetrics>({ defaultTtl: 300000 }); // 5 min cache
   private logger = new Logger('RealtimeMonitoring');
 
   constructor(options: IMonitoringOptions) {

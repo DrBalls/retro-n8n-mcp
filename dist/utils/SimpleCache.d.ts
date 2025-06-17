@@ -19,6 +19,8 @@ export declare class SimpleCache<T = unknown> {
     get size(): number;
     cleanup(): void;
     private findOldestKey;
+    entries(): Array<[string, T]>;
+    values(): T[];
     getStats(): {
         size: number;
         maxSize: number;

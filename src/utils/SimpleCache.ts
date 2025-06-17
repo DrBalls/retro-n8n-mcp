@@ -90,6 +90,34 @@ export class SimpleCache<T = unknown> {
   }
 
   // Get cache statistics
+  // Get all entries
+  entries(): Array<[string, T]> {
+    const validEntries: Array<[string, T]> = [];
+    const now = Date.now();
+    
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp <= entry.ttl) {
+        validEntries.push([key, entry.value]);
+      }
+    }
+    
+    return validEntries;
+  }
+
+  // Get all values
+  values(): T[] {
+    const validValues: T[] = [];
+    const now = Date.now();
+    
+    for (const entry of this.cache.values()) {
+      if (now - entry.timestamp <= entry.ttl) {
+        validValues.push(entry.value);
+      }
+    }
+    
+    return validValues;
+  }
+
   getStats(): {
     size: number;
     maxSize: number;

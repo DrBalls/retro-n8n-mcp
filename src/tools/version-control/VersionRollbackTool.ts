@@ -70,7 +70,7 @@ export class VersionRollbackTool extends BaseTool {
                 message: targetVersion.commitMessage,
                 author: targetVersion.author,
                 createdAt: targetVersion.createdAt,
-                age: this.calculateAge(targetVersion.createdAt),
+                age: this.calculateAge(new Date(targetVersion.createdAt).getTime()),
               },
               currentVersion: {
                 id: currentVersion.id,
@@ -140,7 +140,7 @@ export class VersionRollbackTool extends BaseTool {
             id: targetVersion.id,
             version: targetVersion.versionString,
             message: targetVersion.commitMessage,
-            age: this.calculateAge(targetVersion.createdAt),
+            age: this.calculateAge(new Date(targetVersion.createdAt).getTime()),
           },
           rollbackVersion: {
             id: rollbackVersion.id,
