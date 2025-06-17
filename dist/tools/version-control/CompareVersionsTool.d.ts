@@ -10,7 +10,7 @@ export declare class CompareVersionsTool extends BaseTool {
         includeMetadata: z.ZodDefault<z.ZodBoolean>;
         showOnlyChanges: z.ZodDefault<z.ZodBoolean>;
     }, "strip", z.ZodTypeAny, {
-        format: "text" | "json" | "markdown";
+        format: "json" | "text" | "markdown";
         fromVersionId: string;
         toVersionId: string;
         includeMetadata: boolean;
@@ -18,7 +18,7 @@ export declare class CompareVersionsTool extends BaseTool {
     }, {
         fromVersionId: string;
         toVersionId: string;
-        format?: "text" | "json" | "markdown" | undefined;
+        format?: "json" | "text" | "markdown" | undefined;
         includeMetadata?: boolean | undefined;
         showOnlyChanges?: boolean | undefined;
     }>;

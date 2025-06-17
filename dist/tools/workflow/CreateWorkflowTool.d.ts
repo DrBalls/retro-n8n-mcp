@@ -68,6 +68,7 @@ export declare class CreateWorkflowTool extends BaseTool {
             typeVersion?: number | undefined;
             parameters?: Record<string, unknown> | undefined;
         }[];
+        tags?: string[] | undefined;
         connections?: Record<string, Record<string, {
             type: string;
             node: string;
@@ -79,7 +80,6 @@ export declare class CreateWorkflowTool extends BaseTool {
             errorWorkflow?: string | undefined;
             timezone?: string | undefined;
         } | undefined;
-        tags?: string[] | undefined;
     }, {
         name: string;
         nodes: {
@@ -89,6 +89,7 @@ export declare class CreateWorkflowTool extends BaseTool {
             typeVersion?: number | undefined;
             parameters?: Record<string, unknown> | undefined;
         }[];
+        tags?: string[] | undefined;
         active?: boolean | undefined;
         connections?: Record<string, Record<string, {
             type: string;
@@ -101,7 +102,6 @@ export declare class CreateWorkflowTool extends BaseTool {
             errorWorkflow?: string | undefined;
             timezone?: string | undefined;
         } | undefined;
-        tags?: string[] | undefined;
     }>;
     execute(params: unknown, context: IToolContext): Promise<IToolResponse>;
     getMetadata(): IToolMetadata;

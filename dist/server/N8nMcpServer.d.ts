@@ -1,3 +1,4 @@
+import { IMonitoringConfig } from '../services/monitoring/index.js';
 import { N8nApiConfig } from '../types/config.types.js';
 import { SecurityManager, ISecurityConfig, IApiKey } from '../security/index.js';
 export interface IN8nMcpServerConfig {
@@ -10,6 +11,7 @@ export interface IN8nMcpServerConfig {
         pollingInterval?: number;
         updateInterval?: number;
     };
+    comprehensiveMonitoring?: IMonitoringConfig;
 }
 export declare class N8nMcpServer {
     private server;
@@ -23,6 +25,7 @@ export declare class N8nMcpServer {
     private security;
     private monitoringService?;
     private monitoringResourceProvider?;
+    private comprehensiveMonitoring?;
     constructor(config?: IN8nMcpServerConfig | Partial<N8nApiConfig>);
     private registerTools;
     private updateToolContext;

@@ -35,13 +35,13 @@ export declare const N8nApiConfigSchema: z.ZodObject<{
         ttl: z.ZodDefault<z.ZodNumber>;
         maxSize: z.ZodDefault<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
+        maxSize: number;
         enabled: boolean;
         ttl: number;
-        maxSize: number;
     }, {
+        maxSize?: number | undefined;
         enabled?: boolean | undefined;
         ttl?: number | undefined;
-        maxSize?: number | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     baseUrl: string;
@@ -58,9 +58,9 @@ export declare const N8nApiConfigSchema: z.ZodObject<{
         maxConcurrentRequests: number;
     };
     cache: {
+        maxSize: number;
         enabled: boolean;
         ttl: number;
-        maxSize: number;
     };
     headers?: Record<string, string> | undefined;
 }, {
@@ -79,9 +79,9 @@ export declare const N8nApiConfigSchema: z.ZodObject<{
         maxConcurrentRequests?: number | undefined;
     } | undefined;
     cache?: {
+        maxSize?: number | undefined;
         enabled?: boolean | undefined;
         ttl?: number | undefined;
-        maxSize?: number | undefined;
     } | undefined;
 }>;
 export declare const QueueConfigSchema: z.ZodObject<{
@@ -91,13 +91,13 @@ export declare const QueueConfigSchema: z.ZodObject<{
     highWater: z.ZodDefault<z.ZodNumber>;
     strategy: z.ZodDefault<z.ZodEnum<["fifo", "lifo", "priority"]>>;
 }, "strip", z.ZodTypeAny, {
-    strategy: "fifo" | "lifo" | "priority";
+    strategy: "priority" | "fifo" | "lifo";
     concurrency: number;
     interval: number;
     intervalCap: number;
     highWater: number;
 }, {
-    strategy?: "fifo" | "lifo" | "priority" | undefined;
+    strategy?: "priority" | "fifo" | "lifo" | undefined;
     concurrency?: number | undefined;
     interval?: number | undefined;
     intervalCap?: number | undefined;
@@ -110,14 +110,14 @@ export declare const N8nErrorResponseSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     httpStatusCode: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    message: string;
     code: number;
+    message: string;
     hint?: string | undefined;
     description?: string | undefined;
     httpStatusCode?: number | undefined;
 }, {
-    message: string;
     code: number;
+    message: string;
     hint?: string | undefined;
     description?: string | undefined;
     httpStatusCode?: number | undefined;
@@ -129,15 +129,15 @@ export declare const ApiRequestOptionsSchema: z.ZodObject<{
     headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
     signal: z.ZodOptional<z.ZodType<AbortSignal, z.ZodTypeDef, AbortSignal>>;
 }, "strip", z.ZodTypeAny, {
+    priority?: number | undefined;
     headers?: Record<string, string> | undefined;
     timeout?: number | undefined;
-    priority?: number | undefined;
     skipCache?: boolean | undefined;
     signal?: AbortSignal | undefined;
 }, {
+    priority?: number | undefined;
     headers?: Record<string, string> | undefined;
     timeout?: number | undefined;
-    priority?: number | undefined;
     skipCache?: boolean | undefined;
     signal?: AbortSignal | undefined;
 }>;

@@ -3,6 +3,7 @@ import { ListToolsRequestSchema, CallToolRequestSchema, ListResourcesRequestSche
 import { N8nApiClient } from '../services/N8nApiClient.js';
 import { RealtimeMonitoringService } from '../services/RealtimeMonitoringService.js';
 import { MonitoringResourceProvider } from '../resources/MonitoringResourceProvider.js';
+import { MonitoringService } from '../services/monitoring/index.js';
 import { N8nApiError, N8nAuthenticationError, N8nConnectionError, N8nRateLimitError, } from '../utils/errors.js';
 import { ToolRegistry, ServerHealthTool, TestConnectionTool, ListWorkflowsTool, CreateWorkflowTool, GetWorkflowTool, UpdateWorkflowTool, DeleteWorkflowTool, ActivateWorkflowTool, DeactivateWorkflowTool, TriggerExecutionTool, GetExecutionTool, ListExecutionsTool, StopExecutionTool, MonitorExecutionTool, ReplayExecutionTool, } from '../tools/index.js';
 import { CreateCredentialTool, UpdateCredentialTool, DeleteCredentialTool, ListCredentialsTool, TestCredentialTool, GetCredentialTool, } from '../tools/credential/index.js';
@@ -19,17 +20,20 @@ export class N8nMcpServer {
     security;
     monitoringService;
     monitoringResourceProvider;
+    comprehensiveMonitoring;
     constructor(config) {
         this.startTime = new Date();
         // Handle both old and new config formats
         let apiConfig;
         let securityConfig;
         let monitoringConfig;
+        let comprehensiveMonitoringConfig;
         if (config && 'apiConfig' in config) {
             // New format
             apiConfig = config.apiConfig;
             securityConfig = config.security;
             monitoringConfig = config.monitoring;
+            comprehensiveMonitoringConfig = config.comprehensiveMonitoring;
         }
         else {
             // Old format (backward compatibility)
@@ -65,7 +69,25 @@ export class N8nMcpServer {
         else {
             this.log('warn', 'n8n API client not configured - some features will be unavailable');
         }
-        // Initialize monitoring service if API client is available
+        // Initialize comprehensive monitoring service if configured
+        if (comprehensiveMonitoringConfig) {
+            try {
+                const defaultConfig = MonitoringService.createDefaultConfig({
+                    apiClient: this.apiClient,
+                    database: undefined, // Can be added if database is available
+                    redis: undefined // Can be added if Redis is available
+                });
+                this.comprehensiveMonitoring = new MonitoringService({
+                    ...defaultConfig,
+                    ...comprehensiveMonitoringConfig
+                });
+                this.log('info', 'Comprehensive monitoring service initialized');
+            }
+            catch (error) {
+                this.log('error', 'Failed to initialize comprehensive monitoring service', error);
+            }
+        }
+        // Initialize realtime monitoring service if API client is available
         if (this.apiClient && monitoringConfig) {
             try {
                 this.monitoringService = new RealtimeMonitoringService({
@@ -128,9 +150,18 @@ export class N8nMcpServer {
             this.toolRegistry.register(new GetCredentialTool());
             // Monitoring tools - register after checking for monitoring service
             // These tools will work with polling fallback if no monitoring service is configured
-            const { RealtimeExecutionMonitorTool, WorkflowMetricsMonitorTool } = await import('../tools/monitoring/index.js');
+            const { RealtimeExecutionMonitorTool, WorkflowMetricsMonitorTool, MetricsQueryTool, HealthStatusTool, AnalyticsQueryTool, AlertStatusTool, SLOStatusTool, MonitoringOverviewTool } = await import('../tools/monitoring/index.js');
             this.toolRegistry.register(new RealtimeExecutionMonitorTool());
             this.toolRegistry.register(new WorkflowMetricsMonitorTool());
+            // Register comprehensive monitoring tools if service is available
+            if (this.comprehensiveMonitoring) {
+                this.toolRegistry.register(new MetricsQueryTool());
+                this.toolRegistry.register(new HealthStatusTool());
+                this.toolRegistry.register(new AnalyticsQueryTool());
+                this.toolRegistry.register(new AlertStatusTool());
+                this.toolRegistry.register(new SLOStatusTool());
+                this.toolRegistry.register(new MonitoringOverviewTool());
+            }
             // Debug tools
             const { StartDebugSessionTool, StepDebugTool, InspectDebugTool, BreakpointDebugTool, WatchDebugTool, PauseDebugTool, ResumeDebugTool, StopDebugTool, StatusDebugTool, HistoryDebugTool, TimelineDebugTool } = await import('../tools/debug/index.js');
             this.toolRegistry.register(new StartDebugSessionTool());
@@ -179,7 +210,7 @@ export class N8nMcpServer {
     updateToolContext() {
         const context = {
             apiClient: this.apiClient || undefined,
-            monitoringService: this.monitoringService,
+            monitoringService: this.comprehensiveMonitoring || this.monitoringService,
             metadata: {
                 version: '0.1.0',
                 uptime: this.getUptime(),
@@ -247,13 +278,34 @@ export class N8nMcpServer {
                 }
                 // Update context before executing tool
                 this.updateToolContext();
+                // Record metrics if monitoring is enabled
+                const startTime = Date.now();
+                if (this.comprehensiveMonitoring) {
+                    this.comprehensiveMonitoring.recordRequest(name, 'call');
+                    this.comprehensiveMonitoring.analytics.track('tool:call:start', {
+                        tool: name,
+                        hasArgs: !!args
+                    });
+                }
                 // Execute tool through registry
                 const result = await this.toolRegistry.execute(name, args || {});
-                this.log('debug', `Tool call ${name} completed`);
+                // Record success metrics
+                const duration = Date.now() - startTime;
+                if (this.comprehensiveMonitoring) {
+                    this.comprehensiveMonitoring.recordSuccess(name, 'call', duration);
+                    this.comprehensiveMonitoring.analytics.trackToolUsage(name, true, duration);
+                }
+                this.log('debug', `Tool call ${name} completed in ${duration}ms`);
                 return result;
             }
             catch (error) {
                 this.errorCount++;
+                // Record error metrics
+                if (this.comprehensiveMonitoring) {
+                    const errorType = error instanceof Error ? error.constructor.name : 'UnknownError';
+                    this.comprehensiveMonitoring.recordError(name, errorType);
+                    this.comprehensiveMonitoring.analytics.trackError(error instanceof Error ? error : new Error('Unknown error'), { tool: name });
+                }
                 this.log('error', `Tool call failed: ${name}`, {
                     error: error instanceof Error ? {
                         message: error.message,
@@ -396,14 +448,27 @@ export class N8nMcpServer {
             await this.server.connect(transport);
             this.isConnected = true;
             this.log('info', 'Successfully connected to MCP transport');
-            // Start monitoring service if configured
+            // Start comprehensive monitoring service if configured
+            if (this.comprehensiveMonitoring) {
+                try {
+                    await this.comprehensiveMonitoring.start();
+                    this.log('info', 'Comprehensive monitoring service started');
+                    // Record initial metrics
+                    this.comprehensiveMonitoring.setApiStatus(!!this.apiClient);
+                }
+                catch (error) {
+                    this.log('error', 'Failed to start comprehensive monitoring service', error);
+                    // Don't fail the connection if monitoring fails
+                }
+            }
+            // Start realtime monitoring service if configured
             if (this.monitoringService) {
                 try {
                     await this.monitoringService.start();
-                    this.log('info', 'Monitoring service started');
+                    this.log('info', 'Realtime monitoring service started');
                 }
                 catch (error) {
-                    this.log('error', 'Failed to start monitoring service', error);
+                    this.log('error', 'Failed to start realtime monitoring service', error);
                     // Don't fail the connection if monitoring fails
                 }
             }
@@ -417,14 +482,24 @@ export class N8nMcpServer {
     async close() {
         try {
             this.log('info', 'Closing MCP server');
-            // Stop monitoring service if running
+            // Stop comprehensive monitoring service if running
+            if (this.comprehensiveMonitoring) {
+                try {
+                    await this.comprehensiveMonitoring.stop();
+                    this.log('info', 'Comprehensive monitoring service stopped');
+                }
+                catch (error) {
+                    this.log('error', 'Failed to stop comprehensive monitoring service', error);
+                }
+            }
+            // Stop realtime monitoring service if running
             if (this.monitoringService) {
                 try {
                     this.monitoringService.stop();
-                    this.log('info', 'Monitoring service stopped');
+                    this.log('info', 'Realtime monitoring service stopped');
                 }
                 catch (error) {
-                    this.log('error', 'Failed to stop monitoring service', error);
+                    this.log('error', 'Failed to stop realtime monitoring service', error);
                 }
             }
             this.isConnected = false;

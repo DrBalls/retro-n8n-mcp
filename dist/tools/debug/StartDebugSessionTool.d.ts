@@ -27,8 +27,8 @@ export declare class StartDebugSessionTool extends BaseTool {
         watchExpressions: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         workflowId: string;
-        executionData?: Record<string, any> | undefined;
         executionId?: string | undefined;
+        executionData?: Record<string, any> | undefined;
         breakpoints?: {
             enabled: boolean;
             nodeId: string;
@@ -37,8 +37,8 @@ export declare class StartDebugSessionTool extends BaseTool {
         watchExpressions?: string[] | undefined;
     }, {
         workflowId: string;
-        executionData?: Record<string, any> | undefined;
         executionId?: string | undefined;
+        executionData?: Record<string, any> | undefined;
         breakpoints?: {
             nodeId: string;
             enabled?: boolean | undefined;

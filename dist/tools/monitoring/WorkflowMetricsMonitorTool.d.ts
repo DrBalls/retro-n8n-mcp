@@ -14,8 +14,8 @@ export declare class WorkflowMetricsMonitorTool extends BaseTool {
         includeHistorical: boolean;
         workflowId?: string | undefined;
     }, {
-        interval?: number | undefined;
         workflowId?: string | undefined;
+        interval?: number | undefined;
         duration?: number | undefined;
         includeHistorical?: boolean | undefined;
     }>;

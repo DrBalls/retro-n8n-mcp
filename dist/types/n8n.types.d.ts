@@ -13,8 +13,8 @@ export declare const WorkflowNodeSchema: z.ZodObject<{
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     type: string;
-    id: string;
     name: string;
+    id: string;
     typeVersion: number;
     position: number[];
     parameters: Record<string, unknown>;
@@ -23,8 +23,8 @@ export declare const WorkflowNodeSchema: z.ZodObject<{
     notes?: string | undefined;
 }, {
     type: string;
-    id: string;
     name: string;
+    id: string;
     typeVersion: number;
     position: number[];
     parameters: Record<string, unknown>;
@@ -67,22 +67,22 @@ export declare const WorkflowConnectionSchema: z.ZodObject<{
         inputIndex?: number | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
-    source: {
-        id: string;
-        outputIndex?: number | undefined;
-    };
     target: {
         id: string;
         inputIndex?: number | undefined;
+    };
+    source: {
+        id: string;
+        outputIndex?: number | undefined;
     };
 }, {
-    source: {
-        id: string;
-        outputIndex?: number | undefined;
-    };
     target: {
         id: string;
         inputIndex?: number | undefined;
+    };
+    source: {
+        id: string;
+        outputIndex?: number | undefined;
     };
 }>;
 export declare const WorkflowSchema: z.ZodObject<{
@@ -101,8 +101,8 @@ export declare const WorkflowSchema: z.ZodObject<{
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         type: string;
-        id: string;
         name: string;
+        id: string;
         typeVersion: number;
         position: number[];
         parameters: Record<string, unknown>;
@@ -111,8 +111,8 @@ export declare const WorkflowSchema: z.ZodObject<{
         notes?: string | undefined;
     }, {
         type: string;
-        id: string;
         name: string;
+        id: string;
         typeVersion: number;
         position: number[];
         parameters: Record<string, unknown>;
@@ -142,22 +142,22 @@ export declare const WorkflowSchema: z.ZodObject<{
             inputIndex?: number | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
-        source: {
-            id: string;
-            outputIndex?: number | undefined;
-        };
         target: {
             id: string;
             inputIndex?: number | undefined;
+        };
+        source: {
+            id: string;
+            outputIndex?: number | undefined;
         };
     }, {
-        source: {
-            id: string;
-            outputIndex?: number | undefined;
-        };
         target: {
             id: string;
             inputIndex?: number | undefined;
+        };
+        source: {
+            id: string;
+            outputIndex?: number | undefined;
         };
     }>, z.ZodObject<{
         node: z.ZodString;
@@ -179,13 +179,14 @@ export declare const WorkflowSchema: z.ZodObject<{
     updatedAt: z.ZodString;
     versionId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
+    createdAt: string;
     name: string;
+    id: string;
     active: boolean;
     nodes: {
         type: string;
-        id: string;
         name: string;
+        id: string;
         typeVersion: number;
         position: number[];
         parameters: Record<string, unknown>;
@@ -198,29 +199,29 @@ export declare const WorkflowSchema: z.ZodObject<{
         node: string;
         index: number;
     } | {
-        source: {
-            id: string;
-            outputIndex?: number | undefined;
-        };
         target: {
             id: string;
             inputIndex?: number | undefined;
         };
+        source: {
+            id: string;
+            outputIndex?: number | undefined;
+        };
     })[][]>>;
-    createdAt: string;
     updatedAt: string;
+    tags?: string[] | undefined;
     settings?: Record<string, unknown> | undefined;
     staticData?: Record<string, unknown> | undefined;
-    tags?: string[] | undefined;
     versionId?: string | undefined;
 }, {
-    id: string;
+    createdAt: string;
     name: string;
+    id: string;
     active: boolean;
     nodes: {
         type: string;
-        id: string;
         name: string;
+        id: string;
         typeVersion: number;
         position: number[];
         parameters: Record<string, unknown>;
@@ -233,20 +234,19 @@ export declare const WorkflowSchema: z.ZodObject<{
         node: string;
         index: number;
     } | {
-        source: {
-            id: string;
-            outputIndex?: number | undefined;
-        };
         target: {
             id: string;
             inputIndex?: number | undefined;
         };
+        source: {
+            id: string;
+            outputIndex?: number | undefined;
+        };
     })[][]>>;
-    createdAt: string;
     updatedAt: string;
+    tags?: string[] | undefined;
     settings?: Record<string, unknown> | undefined;
     staticData?: Record<string, unknown> | undefined;
-    tags?: string[] | undefined;
     versionId?: string | undefined;
 }>;
 export declare const ExecutionStatusSchema: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
@@ -333,8 +333,8 @@ export declare const ExecutionSchema: z.ZodObject<{
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -343,8 +343,8 @@ export declare const ExecutionSchema: z.ZodObject<{
             notes?: string | undefined;
         }, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -374,22 +374,22 @@ export declare const ExecutionSchema: z.ZodObject<{
                 inputIndex?: number | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }>, z.ZodObject<{
             node: z.ZodString;
@@ -411,13 +411,14 @@ export declare const ExecutionSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         versionId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -430,29 +431,29 @@ export declare const ExecutionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -465,20 +466,19 @@ export declare const ExecutionSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }>>;
     status: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
@@ -543,49 +543,10 @@ export declare const ExecutionSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
     id: string;
+    workflowId: string;
     finished: boolean;
     mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
     startedAt: string;
-    workflowId: string;
-    retryOf?: string | null | undefined;
-    retrySuccessId?: string | null | undefined;
-    stoppedAt?: string | null | undefined;
-    workflowData?: {
-        id: string;
-        name: string;
-        active: boolean;
-        nodes: {
-            type: string;
-            id: string;
-            name: string;
-            typeVersion: number;
-            position: number[];
-            parameters: Record<string, unknown>;
-            credentials?: Record<string, unknown> | undefined;
-            disabled?: boolean | undefined;
-            notes?: string | undefined;
-        }[];
-        connections: Record<string, Record<string, ({
-            type: string;
-            node: string;
-            index: number;
-        } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
-            target: {
-                id: string;
-                inputIndex?: number | undefined;
-            };
-        })[][]>>;
-        createdAt: string;
-        updatedAt: string;
-        settings?: Record<string, unknown> | undefined;
-        staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
-        versionId?: string | undefined;
-    } | undefined;
     data?: {
         startData?: Record<string, unknown> | undefined;
         resultData?: {
@@ -599,53 +560,53 @@ export declare const ExecutionSchema: z.ZodObject<{
             waitingExecutionSource?: Record<string, unknown> | undefined;
             executionTime?: number | undefined;
         } | undefined;
+    } | undefined;
+    retryOf?: string | null | undefined;
+    retrySuccessId?: string | null | undefined;
+    stoppedAt?: string | null | undefined;
+    workflowData?: {
+        createdAt: string;
+        name: string;
+        id: string;
+        active: boolean;
+        nodes: {
+            type: string;
+            name: string;
+            id: string;
+            typeVersion: number;
+            position: number[];
+            parameters: Record<string, unknown>;
+            credentials?: Record<string, unknown> | undefined;
+            disabled?: boolean | undefined;
+            notes?: string | undefined;
+        }[];
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
+            target: {
+                id: string;
+                inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
+        })[][]>>;
+        updatedAt: string;
+        tags?: string[] | undefined;
+        settings?: Record<string, unknown> | undefined;
+        staticData?: Record<string, unknown> | undefined;
+        versionId?: string | undefined;
     } | undefined;
 }, {
     status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
     id: string;
+    workflowId: string;
     finished: boolean;
     mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
     startedAt: string;
-    workflowId: string;
-    retryOf?: string | null | undefined;
-    retrySuccessId?: string | null | undefined;
-    stoppedAt?: string | null | undefined;
-    workflowData?: {
-        id: string;
-        name: string;
-        active: boolean;
-        nodes: {
-            type: string;
-            id: string;
-            name: string;
-            typeVersion: number;
-            position: number[];
-            parameters: Record<string, unknown>;
-            credentials?: Record<string, unknown> | undefined;
-            disabled?: boolean | undefined;
-            notes?: string | undefined;
-        }[];
-        connections: Record<string, Record<string, ({
-            type: string;
-            node: string;
-            index: number;
-        } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
-            target: {
-                id: string;
-                inputIndex?: number | undefined;
-            };
-        })[][]>>;
-        createdAt: string;
-        updatedAt: string;
-        settings?: Record<string, unknown> | undefined;
-        staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
-        versionId?: string | undefined;
-    } | undefined;
     data?: {
         startData?: Record<string, unknown> | undefined;
         resultData?: {
@@ -659,6 +620,45 @@ export declare const ExecutionSchema: z.ZodObject<{
             waitingExecutionSource?: Record<string, unknown> | undefined;
             executionTime?: number | undefined;
         } | undefined;
+    } | undefined;
+    retryOf?: string | null | undefined;
+    retrySuccessId?: string | null | undefined;
+    stoppedAt?: string | null | undefined;
+    workflowData?: {
+        createdAt: string;
+        name: string;
+        id: string;
+        active: boolean;
+        nodes: {
+            type: string;
+            name: string;
+            id: string;
+            typeVersion: number;
+            position: number[];
+            parameters: Record<string, unknown>;
+            credentials?: Record<string, unknown> | undefined;
+            disabled?: boolean | undefined;
+            notes?: string | undefined;
+        }[];
+        connections: Record<string, Record<string, ({
+            type: string;
+            node: string;
+            index: number;
+        } | {
+            target: {
+                id: string;
+                inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
+        })[][]>>;
+        updatedAt: string;
+        tags?: string[] | undefined;
+        settings?: Record<string, unknown> | undefined;
+        staticData?: Record<string, unknown> | undefined;
+        versionId?: string | undefined;
     } | undefined;
 }>;
 export declare const CredentialTypeSchema: z.ZodObject<{
@@ -701,9 +701,9 @@ export declare const CredentialSchema: z.ZodObject<{
     updatedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     type: string;
-    id: string;
-    name: string;
     createdAt: string;
+    name: string;
+    id: string;
     updatedAt: string;
     nodesAccess?: {
         date: string;
@@ -711,9 +711,9 @@ export declare const CredentialSchema: z.ZodObject<{
     }[] | undefined;
 }, {
     type: string;
-    id: string;
-    name: string;
     createdAt: string;
+    name: string;
+    id: string;
     updatedAt: string;
     nodesAccess?: {
         date: string;
@@ -750,8 +750,8 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -760,8 +760,8 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             notes?: string | undefined;
         }, {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -791,22 +791,22 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
                 inputIndex?: number | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }, {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
+            };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
             };
         }>, z.ZodObject<{
             node: z.ZodString;
@@ -828,13 +828,14 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
         versionId: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -847,29 +848,29 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }, {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -882,32 +883,32 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }>, "many">;
     nextCursor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     data: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -920,32 +921,32 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }[];
     nextCursor?: string | null | undefined;
 }, {
     data: {
-        id: string;
+        createdAt: string;
         name: string;
+        id: string;
         active: boolean;
         nodes: {
             type: string;
-            id: string;
             name: string;
+            id: string;
             typeVersion: number;
             position: number[];
             parameters: Record<string, unknown>;
@@ -958,20 +959,19 @@ export declare const WorkflowListResponseSchema: z.ZodObject<{
             node: string;
             index: number;
         } | {
-            source: {
-                id: string;
-                outputIndex?: number | undefined;
-            };
             target: {
                 id: string;
                 inputIndex?: number | undefined;
             };
+            source: {
+                id: string;
+                outputIndex?: number | undefined;
+            };
         })[][]>>;
-        createdAt: string;
         updatedAt: string;
+        tags?: string[] | undefined;
         settings?: Record<string, unknown> | undefined;
         staticData?: Record<string, unknown> | undefined;
-        tags?: string[] | undefined;
         versionId?: string | undefined;
     }[];
     nextCursor?: string | null | undefined;
@@ -1002,8 +1002,8 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
                 type: string;
-                id: string;
                 name: string;
+                id: string;
                 typeVersion: number;
                 position: number[];
                 parameters: Record<string, unknown>;
@@ -1012,8 +1012,8 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 notes?: string | undefined;
             }, {
                 type: string;
-                id: string;
                 name: string;
+                id: string;
                 typeVersion: number;
                 position: number[];
                 parameters: Record<string, unknown>;
@@ -1043,22 +1043,22 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                     inputIndex?: number | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
                 target: {
                     id: string;
                     inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
                 };
             }, {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
                 target: {
                     id: string;
                     inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
                 };
             }>, z.ZodObject<{
                 node: z.ZodString;
@@ -1080,13 +1080,14 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
             updatedAt: z.ZodString;
             versionId: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            id: string;
+            createdAt: string;
             name: string;
+            id: string;
             active: boolean;
             nodes: {
                 type: string;
-                id: string;
                 name: string;
+                id: string;
                 typeVersion: number;
                 position: number[];
                 parameters: Record<string, unknown>;
@@ -1099,29 +1100,29 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 node: string;
                 index: number;
             } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
                 target: {
                     id: string;
                     inputIndex?: number | undefined;
                 };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
             })[][]>>;
-            createdAt: string;
             updatedAt: string;
+            tags?: string[] | undefined;
             settings?: Record<string, unknown> | undefined;
             staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
             versionId?: string | undefined;
         }, {
-            id: string;
+            createdAt: string;
             name: string;
+            id: string;
             active: boolean;
             nodes: {
                 type: string;
-                id: string;
                 name: string;
+                id: string;
                 typeVersion: number;
                 position: number[];
                 parameters: Record<string, unknown>;
@@ -1134,20 +1135,19 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 node: string;
                 index: number;
             } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
                 target: {
                     id: string;
                     inputIndex?: number | undefined;
                 };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
             })[][]>>;
-            createdAt: string;
             updatedAt: string;
+            tags?: string[] | undefined;
             settings?: Record<string, unknown> | undefined;
             staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
             versionId?: string | undefined;
         }>>;
         status: z.ZodEnum<["canceled", "crashed", "error", "new", "running", "success", "unknown", "waiting"]>;
@@ -1212,49 +1212,10 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
         id: string;
+        workflowId: string;
         finished: boolean;
         mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
         startedAt: string;
-        workflowId: string;
-        retryOf?: string | null | undefined;
-        retrySuccessId?: string | null | undefined;
-        stoppedAt?: string | null | undefined;
-        workflowData?: {
-            id: string;
-            name: string;
-            active: boolean;
-            nodes: {
-                type: string;
-                id: string;
-                name: string;
-                typeVersion: number;
-                position: number[];
-                parameters: Record<string, unknown>;
-                credentials?: Record<string, unknown> | undefined;
-                disabled?: boolean | undefined;
-                notes?: string | undefined;
-            }[];
-            connections: Record<string, Record<string, ({
-                type: string;
-                node: string;
-                index: number;
-            } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
-                target: {
-                    id: string;
-                    inputIndex?: number | undefined;
-                };
-            })[][]>>;
-            createdAt: string;
-            updatedAt: string;
-            settings?: Record<string, unknown> | undefined;
-            staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
-            versionId?: string | undefined;
-        } | undefined;
         data?: {
             startData?: Record<string, unknown> | undefined;
             resultData?: {
@@ -1268,53 +1229,53 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 waitingExecutionSource?: Record<string, unknown> | undefined;
                 executionTime?: number | undefined;
             } | undefined;
+        } | undefined;
+        retryOf?: string | null | undefined;
+        retrySuccessId?: string | null | undefined;
+        stoppedAt?: string | null | undefined;
+        workflowData?: {
+            createdAt: string;
+            name: string;
+            id: string;
+            active: boolean;
+            nodes: {
+                type: string;
+                name: string;
+                id: string;
+                typeVersion: number;
+                position: number[];
+                parameters: Record<string, unknown>;
+                credentials?: Record<string, unknown> | undefined;
+                disabled?: boolean | undefined;
+                notes?: string | undefined;
+            }[];
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
+                target: {
+                    id: string;
+                    inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
+            })[][]>>;
+            updatedAt: string;
+            tags?: string[] | undefined;
+            settings?: Record<string, unknown> | undefined;
+            staticData?: Record<string, unknown> | undefined;
+            versionId?: string | undefined;
         } | undefined;
     }, {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
         id: string;
+        workflowId: string;
         finished: boolean;
         mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
         startedAt: string;
-        workflowId: string;
-        retryOf?: string | null | undefined;
-        retrySuccessId?: string | null | undefined;
-        stoppedAt?: string | null | undefined;
-        workflowData?: {
-            id: string;
-            name: string;
-            active: boolean;
-            nodes: {
-                type: string;
-                id: string;
-                name: string;
-                typeVersion: number;
-                position: number[];
-                parameters: Record<string, unknown>;
-                credentials?: Record<string, unknown> | undefined;
-                disabled?: boolean | undefined;
-                notes?: string | undefined;
-            }[];
-            connections: Record<string, Record<string, ({
-                type: string;
-                node: string;
-                index: number;
-            } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
-                target: {
-                    id: string;
-                    inputIndex?: number | undefined;
-                };
-            })[][]>>;
-            createdAt: string;
-            updatedAt: string;
-            settings?: Record<string, unknown> | undefined;
-            staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
-            versionId?: string | undefined;
-        } | undefined;
         data?: {
             startData?: Record<string, unknown> | undefined;
             resultData?: {
@@ -1328,6 +1289,45 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 waitingExecutionSource?: Record<string, unknown> | undefined;
                 executionTime?: number | undefined;
             } | undefined;
+        } | undefined;
+        retryOf?: string | null | undefined;
+        retrySuccessId?: string | null | undefined;
+        stoppedAt?: string | null | undefined;
+        workflowData?: {
+            createdAt: string;
+            name: string;
+            id: string;
+            active: boolean;
+            nodes: {
+                type: string;
+                name: string;
+                id: string;
+                typeVersion: number;
+                position: number[];
+                parameters: Record<string, unknown>;
+                credentials?: Record<string, unknown> | undefined;
+                disabled?: boolean | undefined;
+                notes?: string | undefined;
+            }[];
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
+                target: {
+                    id: string;
+                    inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
+            })[][]>>;
+            updatedAt: string;
+            tags?: string[] | undefined;
+            settings?: Record<string, unknown> | undefined;
+            staticData?: Record<string, unknown> | undefined;
+            versionId?: string | undefined;
         } | undefined;
     }>, "many">;
     nextCursor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -1335,49 +1335,10 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
     data: {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
         id: string;
+        workflowId: string;
         finished: boolean;
         mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
         startedAt: string;
-        workflowId: string;
-        retryOf?: string | null | undefined;
-        retrySuccessId?: string | null | undefined;
-        stoppedAt?: string | null | undefined;
-        workflowData?: {
-            id: string;
-            name: string;
-            active: boolean;
-            nodes: {
-                type: string;
-                id: string;
-                name: string;
-                typeVersion: number;
-                position: number[];
-                parameters: Record<string, unknown>;
-                credentials?: Record<string, unknown> | undefined;
-                disabled?: boolean | undefined;
-                notes?: string | undefined;
-            }[];
-            connections: Record<string, Record<string, ({
-                type: string;
-                node: string;
-                index: number;
-            } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
-                target: {
-                    id: string;
-                    inputIndex?: number | undefined;
-                };
-            })[][]>>;
-            createdAt: string;
-            updatedAt: string;
-            settings?: Record<string, unknown> | undefined;
-            staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
-            versionId?: string | undefined;
-        } | undefined;
         data?: {
             startData?: Record<string, unknown> | undefined;
             resultData?: {
@@ -1391,6 +1352,45 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 waitingExecutionSource?: Record<string, unknown> | undefined;
                 executionTime?: number | undefined;
             } | undefined;
+        } | undefined;
+        retryOf?: string | null | undefined;
+        retrySuccessId?: string | null | undefined;
+        stoppedAt?: string | null | undefined;
+        workflowData?: {
+            createdAt: string;
+            name: string;
+            id: string;
+            active: boolean;
+            nodes: {
+                type: string;
+                name: string;
+                id: string;
+                typeVersion: number;
+                position: number[];
+                parameters: Record<string, unknown>;
+                credentials?: Record<string, unknown> | undefined;
+                disabled?: boolean | undefined;
+                notes?: string | undefined;
+            }[];
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
+                target: {
+                    id: string;
+                    inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
+            })[][]>>;
+            updatedAt: string;
+            tags?: string[] | undefined;
+            settings?: Record<string, unknown> | undefined;
+            staticData?: Record<string, unknown> | undefined;
+            versionId?: string | undefined;
         } | undefined;
     }[];
     nextCursor?: string | null | undefined;
@@ -1398,49 +1398,10 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
     data: {
         status: "success" | "error" | "unknown" | "canceled" | "crashed" | "new" | "running" | "waiting";
         id: string;
+        workflowId: string;
         finished: boolean;
         mode: "retry" | "manual" | "trigger" | "webhook" | "integrated" | "cli";
         startedAt: string;
-        workflowId: string;
-        retryOf?: string | null | undefined;
-        retrySuccessId?: string | null | undefined;
-        stoppedAt?: string | null | undefined;
-        workflowData?: {
-            id: string;
-            name: string;
-            active: boolean;
-            nodes: {
-                type: string;
-                id: string;
-                name: string;
-                typeVersion: number;
-                position: number[];
-                parameters: Record<string, unknown>;
-                credentials?: Record<string, unknown> | undefined;
-                disabled?: boolean | undefined;
-                notes?: string | undefined;
-            }[];
-            connections: Record<string, Record<string, ({
-                type: string;
-                node: string;
-                index: number;
-            } | {
-                source: {
-                    id: string;
-                    outputIndex?: number | undefined;
-                };
-                target: {
-                    id: string;
-                    inputIndex?: number | undefined;
-                };
-            })[][]>>;
-            createdAt: string;
-            updatedAt: string;
-            settings?: Record<string, unknown> | undefined;
-            staticData?: Record<string, unknown> | undefined;
-            tags?: string[] | undefined;
-            versionId?: string | undefined;
-        } | undefined;
         data?: {
             startData?: Record<string, unknown> | undefined;
             resultData?: {
@@ -1454,6 +1415,45 @@ export declare const ExecutionListResponseSchema: z.ZodObject<{
                 waitingExecutionSource?: Record<string, unknown> | undefined;
                 executionTime?: number | undefined;
             } | undefined;
+        } | undefined;
+        retryOf?: string | null | undefined;
+        retrySuccessId?: string | null | undefined;
+        stoppedAt?: string | null | undefined;
+        workflowData?: {
+            createdAt: string;
+            name: string;
+            id: string;
+            active: boolean;
+            nodes: {
+                type: string;
+                name: string;
+                id: string;
+                typeVersion: number;
+                position: number[];
+                parameters: Record<string, unknown>;
+                credentials?: Record<string, unknown> | undefined;
+                disabled?: boolean | undefined;
+                notes?: string | undefined;
+            }[];
+            connections: Record<string, Record<string, ({
+                type: string;
+                node: string;
+                index: number;
+            } | {
+                target: {
+                    id: string;
+                    inputIndex?: number | undefined;
+                };
+                source: {
+                    id: string;
+                    outputIndex?: number | undefined;
+                };
+            })[][]>>;
+            updatedAt: string;
+            tags?: string[] | undefined;
+            settings?: Record<string, unknown> | undefined;
+            staticData?: Record<string, unknown> | undefined;
+            versionId?: string | undefined;
         } | undefined;
     }[];
     nextCursor?: string | null | undefined;
@@ -1477,9 +1477,9 @@ export declare const CredentialListResponseSchema: z.ZodObject<{
         updatedAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         type: string;
-        id: string;
-        name: string;
         createdAt: string;
+        name: string;
+        id: string;
         updatedAt: string;
         nodesAccess?: {
             date: string;
@@ -1487,9 +1487,9 @@ export declare const CredentialListResponseSchema: z.ZodObject<{
         }[] | undefined;
     }, {
         type: string;
-        id: string;
-        name: string;
         createdAt: string;
+        name: string;
+        id: string;
         updatedAt: string;
         nodesAccess?: {
             date: string;
@@ -1500,9 +1500,9 @@ export declare const CredentialListResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     data: {
         type: string;
-        id: string;
-        name: string;
         createdAt: string;
+        name: string;
+        id: string;
         updatedAt: string;
         nodesAccess?: {
             date: string;
@@ -1513,9 +1513,9 @@ export declare const CredentialListResponseSchema: z.ZodObject<{
 }, {
     data: {
         type: string;
-        id: string;
-        name: string;
         createdAt: string;
+        name: string;
+        id: string;
         updatedAt: string;
         nodesAccess?: {
             date: string;

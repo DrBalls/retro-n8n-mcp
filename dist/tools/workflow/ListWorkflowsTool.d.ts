@@ -13,12 +13,12 @@ export declare class ListWorkflowsTool extends BaseTool {
         tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         limit: number;
-        active?: boolean | undefined;
         tags?: string[] | undefined;
+        active?: boolean | undefined;
         cursor?: string | undefined;
     }, {
-        active?: boolean | undefined;
         tags?: string[] | undefined;
+        active?: boolean | undefined;
         limit?: number | undefined;
         cursor?: string | undefined;
     }>;

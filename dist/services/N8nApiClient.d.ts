@@ -1,4 +1,6 @@
 import { SimpleCache } from '../utils/SimpleCache.js';
+import { MultiTierCacheManager } from './cache/MultiTierCacheManager.js';
+import { CacheConfig } from '../types/cache.types.js';
 import { N8nApiConfig } from '../types/config.types.js';
 import { Workflow, WorkflowListResponse, Execution, ExecutionListResponse, Credential, CredentialListResponse } from '../types/n8n.types.js';
 export declare class N8nApiClient {
@@ -6,11 +8,13 @@ export declare class N8nApiClient {
     private config;
     private queue;
     private cache;
+    private multiTierCache?;
     private baseUrl;
-    constructor(config?: Partial<N8nApiConfig>);
+    constructor(config?: Partial<N8nApiConfig>, cacheConfig?: CacheConfig);
     private setupInterceptors;
     private executeWithRetry;
     private getCacheKey;
+    private generateCacheTags;
     private request;
     testConnection(): Promise<{
         connected: boolean;
@@ -59,5 +63,8 @@ export declare class N8nApiClient {
     };
     pauseQueue(): void;
     resumeQueue(): void;
+    getCacheManager(): MultiTierCacheManager | undefined;
+    closeCache(): Promise<void>;
+    invalidateCache(pattern?: string): Promise<number>;
 }
 //# sourceMappingURL=N8nApiClient.d.ts.map
