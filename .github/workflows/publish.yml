@@ -140,7 +140,7 @@ jobs:
         if: needs.publish.result == 'success'
         run: |
           echo "✅ Successfully published version ${{ needs.publish.outputs.version }} to NPM!"
-          echo "📦 View package: https://www.npmjs.com/package/@retro/n8n-mcp-server"
+          echo "📦 View package: https://www.npmjs.com/package/@drballs/n8n-mcp-server"
       
       - name: Notify failure
         if: needs.publish.result == 'failure'
