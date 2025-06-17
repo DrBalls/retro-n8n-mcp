@@ -42,7 +42,7 @@ export declare const WorkflowChangeSchema: z.ZodObject<{
     timestamp: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     path: string;
-    type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+    type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
     timestamp: string;
     id: string;
     description?: string | undefined;
@@ -50,7 +50,7 @@ export declare const WorkflowChangeSchema: z.ZodObject<{
     newValue?: unknown;
 }, {
     path: string;
-    type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+    type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
     timestamp: string;
     id: string;
     description?: string | undefined;
@@ -256,7 +256,7 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
         timestamp: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         path: string;
-        type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
         timestamp: string;
         id: string;
         description?: string | undefined;
@@ -264,7 +264,7 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
         newValue?: unknown;
     }, {
         path: string;
-        type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
         timestamp: string;
         id: string;
         description?: string | undefined;
@@ -342,7 +342,7 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
     };
     changes: {
         path: string;
-        type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
         timestamp: string;
         id: string;
         description?: string | undefined;
@@ -405,7 +405,7 @@ export declare const WorkflowVersionSchema: z.ZodObject<{
     };
     changes: {
         path: string;
-        type: "delete" | "update" | "create" | "move" | "rename" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
+        type: "delete" | "move" | "rename" | "update" | "create" | "parameter_change" | "connection_change" | "node_add" | "node_remove" | "activation_change";
         timestamp: string;
         id: string;
         description?: string | undefined;
@@ -825,13 +825,13 @@ export declare const DiffOperationSchema: z.ZodObject<{
     from: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     path: string;
-    operation: "replace" | "add" | "remove" | "move" | "copy";
+    operation: "move" | "copy" | "replace" | "add" | "remove";
     value?: unknown;
     oldValue?: unknown;
     from?: string | undefined;
 }, {
     path: string;
-    operation: "replace" | "add" | "remove" | "move" | "copy";
+    operation: "move" | "copy" | "replace" | "add" | "remove";
     value?: unknown;
     oldValue?: unknown;
     from?: string | undefined;
@@ -847,13 +847,13 @@ export declare const VersionDiffSchema: z.ZodObject<{
         from: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         path: string;
-        operation: "replace" | "add" | "remove" | "move" | "copy";
+        operation: "move" | "copy" | "replace" | "add" | "remove";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
     }, {
         path: string;
-        operation: "replace" | "add" | "remove" | "move" | "copy";
+        operation: "move" | "copy" | "replace" | "add" | "remove";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
@@ -894,7 +894,7 @@ export declare const VersionDiffSchema: z.ZodObject<{
     toVersionId: string;
     operations: {
         path: string;
-        operation: "replace" | "add" | "remove" | "move" | "copy";
+        operation: "move" | "copy" | "replace" | "add" | "remove";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
@@ -913,7 +913,7 @@ export declare const VersionDiffSchema: z.ZodObject<{
     toVersionId: string;
     operations: {
         path: string;
-        operation: "replace" | "add" | "remove" | "move" | "copy";
+        operation: "move" | "copy" | "replace" | "add" | "remove";
         value?: unknown;
         oldValue?: unknown;
         from?: string | undefined;
