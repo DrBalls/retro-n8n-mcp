@@ -17,25 +17,37 @@ A comprehensive MCP (Model Context Protocol) server providing full access to n8n
 - n8n API access (requires paid n8n plan)
 - Claude Desktop application
 
-## 🔧 Installation
+## 🔧 Installation & Configuration
 
-### From NPM (Recommended)
-```bash
-npm install -g @drballs/n8n-mcp-server
+### Step 1: Find Your Claude Desktop Config File
+
+The config file location depends on your operating system:
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+### Step 2: Add MCP Server Configuration
+
+Add this to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "n8n-mcp-server": {
+      "command": "npx",
+      "args": ["@drballs/n8n-mcp-server@0.1.6"],
+      "env": {
+        "N8N_API_KEY": "your-n8n-api-key-here",
+        "N8N_BASE_URL": "https://your-n8n-instance.com"
+      }
+    }
+  }
+}
 ```
 
-### From Source
-```bash
-git clone https://github.com/your-org/retro-n8n-mcp
-cd retro-n8n-mcp
-git checkout production
-npm install
-npm run build
-```
+### Step 3: Get Your n8n Credentials
 
-## ⚙️ Configuration
-
-### 1. Get Your n8n API Key
+**Get Your n8n API Key:**
 
 **n8n Cloud:**
 1. Go to your n8n dashboard
@@ -85,9 +97,38 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-### 3. Restart Claude Desktop
+### Step 4: Restart Claude Desktop
 
-After saving the configuration, restart Claude Desktop to load the MCP server.
+After saving the configuration:
+1. **Completely quit** Claude Desktop (don't just close the window)
+2. **Start Claude Desktop** again 
+3. The n8n tools should now appear and work with your credentials
+
+## 🚨 Authentication Troubleshooting
+
+**If you see "authentication error" even though tools are visible:**
+
+1. **Verify your API key format:**
+   - n8n Cloud: `n8n_api_1234567890abcdef`
+   - Self-hosted: May vary, check your n8n settings
+
+2. **Check your base URL:**
+   - Include protocol: ✅ `https://n8n.example.com`
+   - No trailing slash: ✅ `https://n8n.example.com` (not `https://n8n.example.com/`)
+   - Local instances: ✅ `http://localhost:5678`
+
+3. **Test your credentials manually:**
+   ```bash
+   curl -X GET "YOUR_BASE_URL/api/v1/workflows" \
+     -H "X-N8N-API-KEY: YOUR_API_KEY"
+   ```
+
+4. **Common issues:**
+   - API access requires a paid n8n plan
+   - API must be enabled in n8n settings
+   - Check for IP restrictions in n8n
+
+**Need more help?** See the full configuration guide: [N8N_CONFIGURATION_GUIDE.md](./N8N_CONFIGURATION_GUIDE.md)
 
 ## 🛠️ Available Tools
 

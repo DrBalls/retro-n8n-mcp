@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "n8n-mcp-server": {
+      "command": "npx",
+      "args": ["@drballs/n8n-mcp-server@0.1.6"],
+      "env": {
+        "N8N_API_KEY": "your-n8n-api-key-here",
+        "N8N_BASE_URL": "https://your-n8n-instance.com"
+      }
+    }
+  }
+}
