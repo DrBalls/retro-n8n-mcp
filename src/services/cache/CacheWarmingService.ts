@@ -264,7 +264,7 @@ export class CacheWarmingService {
     // Pattern-based warming strategies
     if (strategy.pattern.includes('workflow')) {
       // Warm workflow data
-      const workflows = await this.apiClient.getWorkflows();
+      const workflows = await this.apiClient.getWorkflows() as any[];
       
       for (let i = 0; i < Math.min(workflows.length, strategy.batchSize); i++) {
         const workflow = workflows[i];
@@ -279,7 +279,7 @@ export class CacheWarmingService {
 
     if (strategy.pattern.includes('execution')) {
       // Warm recent execution data
-      const executions = await this.apiClient.getExecutions({ limit: strategy.batchSize });
+      const executions = await this.apiClient.getExecutions({ limit: strategy.batchSize }) as any[];
       
       for (const execution of executions) {
         const key = keyBuilder.execution(execution.id);
