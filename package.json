@@ -1,6 +1,6 @@
 {
   "name": "@drballs/n8n-mcp-server",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Comprehensive n8n MCP server providing full access to n8n's workflow automation capabilities (Production Build)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -37,6 +37,9 @@
     "url": "https://github.com/DrBalls/retro-n8n-mcp/issues"
   },
   "homepage": "https://github.com/DrBalls/retro-n8n-mcp#readme",
+  "bin": {
+    "n8n-mcp-server": "./dist/index.js"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
