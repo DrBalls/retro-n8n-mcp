@@ -22,7 +22,7 @@ import { AlertManager } from './AlertManager.js';
 import { SLOManager } from './SLOManager.js';
 import { TelemetryTracer } from './TelemetryTracer.js';
 import { EventEmitter } from 'events';
-import express from 'express';
+import express, { Application } from 'express';
 
 /**
  * Monitoring service implementation
@@ -37,7 +37,7 @@ export class MonitoringService extends EventEmitter implements IMonitoringServic
 
   private config: IMonitoringConfig;
   private startTime: Date;
-  private metricsServer?: express.Application;
+  private metricsServer?: Application | ReturnType<Application['listen']>;
   private metricsPort?: number;
 
   // Standard metrics
@@ -63,7 +63,7 @@ export class MonitoringService extends EventEmitter implements IMonitoringServic
     this.alerts = new AlertManager(this.metrics, config.alerts);
     this.slos = new SLOManager(this.metrics, config.slo);
     this.telemetry = new TelemetryTracer({
-      exporter: config.telemetry?.exporter || 'console',
+      exporter: (config.telemetry?.exporter || 'console') as any,
       serviceName: config.telemetry?.serviceName || 'n8n-mcp-server'
     });
 
@@ -112,9 +112,9 @@ export class MonitoringService extends EventEmitter implements IMonitoringServic
     this.telemetry.stop();
 
     // Stop metrics server
-    if (this.metricsServer) {
+    if (this.metricsServer && 'close' in this.metricsServer) {
       await new Promise<void>((resolve) => {
-        this.metricsServer!.listen().close(() => resolve());
+        (this.metricsServer as any).close(() => resolve());
       });
     }
 

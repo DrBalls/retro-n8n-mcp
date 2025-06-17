@@ -22,12 +22,12 @@ class SLOCalculator {
     const goodMetric = this.metrics.getMetric(slo.indicator.good);
     const totalMetric = this.metrics.getMetric(slo.indicator.total);
 
-    const good = goodMetric && 'value' in goodMetric ? goodMetric.value : 0;
-    const total = totalMetric && 'value' in totalMetric ? totalMetric.value : 0;
+    const good = goodMetric && 'value' in goodMetric ? (goodMetric as any).value : 0;
+    const total = totalMetric && 'value' in totalMetric ? (totalMetric as any).value : 0;
 
     const percentage = total > 0 ? (good / total) * 100 : 100;
 
-    return { good, total, percentage };
+    return { good: good as number, total: total as number, percentage };
   }
 
   calculateErrorBudget(slo: ISLO, currentPercentage: number): number {

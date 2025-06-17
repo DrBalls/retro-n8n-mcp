@@ -44,7 +44,7 @@ export class MonitoringService extends EventEmitter {
         this.alerts = new AlertManager(this.metrics, config.alerts);
         this.slos = new SLOManager(this.metrics, config.slo);
         this.telemetry = new TelemetryTracer({
-            exporter: config.telemetry?.exporter || 'console',
+            exporter: (config.telemetry?.exporter || 'console'),
             serviceName: config.telemetry?.serviceName || 'n8n-mcp-server'
         });
         // Register standard metrics
@@ -82,9 +82,9 @@ export class MonitoringService extends EventEmitter {
         this.slos.stop();
         this.telemetry.stop();
         // Stop metrics server
-        if (this.metricsServer) {
+        if (this.metricsServer && 'close' in this.metricsServer) {
             await new Promise((resolve) => {
-                this.metricsServer.listen().close(() => resolve());
+                this.metricsServer.close(() => resolve());
             });
         }
         this.analytics.track('monitoring:stopped');

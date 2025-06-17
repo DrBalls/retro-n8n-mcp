@@ -18,7 +18,7 @@ class SLOCalculator {
         const good = goodMetric && 'value' in goodMetric ? goodMetric.value : 0;
         const total = totalMetric && 'value' in totalMetric ? totalMetric.value : 0;
         const percentage = total > 0 ? (good / total) * 100 : 100;
-        return { good, total, percentage };
+        return { good: good, total: total, percentage };
     }
     calculateErrorBudget(slo, currentPercentage) {
         const errorBudgetTotal = 100 - slo.target;

@@ -46,29 +46,55 @@ export class RedisCacheLayer {
                 this.isConnected = true;
                 return;
             }
-            // Create Redis client
-            this.client = Redis.createClient({
+            // Create Redis client and wrap it to match our interface
+            const redisClient = Redis.createClient({
                 url: `redis://${this.config.host}:${this.config.port}`,
                 password: this.config.password,
                 database: this.config.db,
             });
+            // Wrap the Redis client to match our interface
+            this.client = {
+                get: (key) => redisClient.get(key),
+                set: (key, value, options) => options?.EX ? redisClient.setEx(key, options.EX, value) : redisClient.set(key, value),
+                setEx: (key, seconds, value) => redisClient.setEx(key, seconds, value),
+                del: (...keys) => redisClient.del(keys),
+                keys: (pattern) => redisClient.keys(pattern),
+                flushDb: () => redisClient.flushDb(),
+                mGet: (keys) => redisClient.mGet(keys),
+                mSet: (keyValues) => {
+                    const args = [];
+                    keyValues.forEach(([k, v]) => args.push(k, v));
+                    return redisClient.mSet(args);
+                },
+                ping: () => redisClient.ping(),
+                quit: () => redisClient.quit(),
+                info: (section) => redisClient.info(section),
+                dbSize: () => redisClient.dbSize(),
+                on: redisClient.on ? redisClient.on.bind(redisClient) : undefined,
+                connect: redisClient.connect ? async () => { await redisClient.connect(); } : undefined,
+                disconnect: redisClient.disconnect ? redisClient.disconnect.bind(redisClient) : undefined,
+            };
             // Handle connection events
-            this.client.on?.('connect', () => {
-                this.isConnected = true;
-                this.logger.info('Connected to Redis');
-            });
-            this.client.on?.('error', (error) => {
-                this.isConnected = false;
-                this.stats.connectionErrors++;
-                this.logger.error('Redis connection error', { error });
-            });
-            this.client.on?.('end', () => {
-                this.isConnected = false;
-                this.logger.warn('Redis connection ended');
-            });
+            if (this.client && this.client.on) {
+                this.client.on('connect', () => {
+                    this.isConnected = true;
+                    this.logger.info('Connected to Redis');
+                });
+                this.client.on('error', (error) => {
+                    this.isConnected = false;
+                    this.stats.connectionErrors++;
+                    this.logger.error('Redis connection error', { error });
+                });
+                this.client.on('end', () => {
+                    this.isConnected = false;
+                    this.logger.warn('Redis connection ended');
+                });
+            }
             // Connect to Redis
-            await this.client.connect?.();
-            this.isConnected = true;
+            if (this.client && this.client.connect) {
+                await this.client.connect();
+                this.isConnected = true;
+            }
         }
         catch (error) {
             this.logger.error('Failed to initialize Redis client', { error });
@@ -118,7 +144,7 @@ export class RedisCacheLayer {
             entry.accessedAt = now;
             entry.accessCount = (entry.accessCount || 0) + 1;
             // Store updated entry back (for access tracking)
-            await this.client.set(this.buildKey(key), JSON.stringify(entry), 'EX', Math.ceil((entry.ttl || this.config.ttlMs) / 1000));
+            await this.client.set(this.buildKey(key), JSON.stringify(entry), { EX: Math.ceil((entry.ttl || this.config.ttlMs) / 1000) });
             this.stats.hits++;
             return entry;
         }
@@ -147,7 +173,7 @@ export class RedisCacheLayer {
             };
             await this.measureLatency(async () => {
                 const serialized = JSON.stringify(entry);
-                return await this.client.setex(this.buildKey(key), Math.ceil(ttl / 1000), serialized);
+                return await this.client.setEx(this.buildKey(key), Math.ceil(ttl / 1000), serialized);
             });
             this.stats.sets++;
             return true;
@@ -205,7 +231,7 @@ export class RedisCacheLayer {
         try {
             const redisKeys = keys.map(key => this.buildKey(key));
             const results = await this.measureLatency(async () => {
-                return await this.client.mget(...redisKeys);
+                return await this.client.mGet(redisKeys);
             });
             const entries = new Map();
             const now = Date.now();
@@ -264,13 +290,18 @@ export class RedisCacheLayer {
                 keyValues.push(this.buildKey(key), JSON.stringify(entry));
             }
             await this.measureLatency(async () => {
-                return await this.client.mset(...keyValues);
+                // Convert array to key-value pairs for mSet
+                const pairs = [];
+                for (let i = 0; i < keyValues.length; i += 2) {
+                    pairs.push([keyValues[i], keyValues[i + 1]]);
+                }
+                return await this.client.mSet(pairs);
             });
             // Set TTL for each key (Redis MSET doesn't support TTL)
             const ttlPromises = [];
             for (const [key, data] of entries) {
                 const ttl = data.ttl || this.config.ttlMs;
-                ttlPromises.push(this.client.setex(this.buildKey(key), Math.ceil(ttl / 1000), JSON.stringify({
+                ttlPromises.push(this.client.setEx(this.buildKey(key), Math.ceil(ttl / 1000), JSON.stringify({
                     key,
                     value: data.value,
                     ttl,
@@ -370,7 +401,7 @@ export class RedisCacheLayer {
         let totalSizeBytes = 0;
         try {
             if (this.isConnected && this.client) {
-                totalItems = await this.client.dbsize();
+                totalItems = await this.client.dbSize();
                 // Get memory info if available
                 const info = await this.client.info('memory');
                 const memoryMatch = info.match(/used_memory:(\d+)/);
@@ -437,14 +468,14 @@ class MockRedisClient {
         }
         return this.data.get(key) || null;
     }
-    async set(key, value, mode, duration) {
+    async set(key, value, options) {
         this.data.set(key, value);
-        if (mode === 'EX' && duration) {
-            this.expirations.set(key, Date.now() + duration * 1000);
+        if (options?.EX) {
+            this.expirations.set(key, Date.now() + options.EX * 1000);
         }
         return 'OK';
     }
-    async setex(key, seconds, value) {
+    async setEx(key, seconds, value) {
         this.data.set(key, value);
         this.expirations.set(key, Date.now() + seconds * 1000);
         return 'OK';
@@ -463,21 +494,17 @@ class MockRedisClient {
         const regex = new RegExp(pattern.replace(/\*/g, '.*').replace(/\?/g, '.'));
         return Array.from(this.data.keys()).filter(key => regex.test(key));
     }
-    async flushdb() {
+    async flushDb() {
         this.data.clear();
         this.expirations.clear();
         return 'OK';
     }
-    async mget(...keys) {
+    async mGet(keys) {
         return Promise.all(keys.map(key => this.get(key)));
     }
-    async mset(...keyValues) {
-        for (let i = 0; i < keyValues.length; i += 2) {
-            const key = keyValues[i];
-            const value = keyValues[i + 1];
-            if (key && value !== undefined) {
-                this.data.set(key, value);
-            }
+    async mSet(keyValues) {
+        for (const [key, value] of keyValues) {
+            this.data.set(key, value);
         }
         return 'OK';
     }
@@ -490,7 +517,7 @@ class MockRedisClient {
     async info(section) {
         return 'used_memory:1024\nconnected_clients:1';
     }
-    async dbsize() {
+    async dbSize() {
         return this.data.size;
     }
 }

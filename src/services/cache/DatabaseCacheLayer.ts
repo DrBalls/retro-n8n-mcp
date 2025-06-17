@@ -610,7 +610,7 @@ export class DatabaseCacheLayer implements ICacheLayer {
     }
   }
 
-  private async cleanup(): void {
+  private async cleanup(): Promise<void> {
     if (!this.config.enabled || !this.isInitialized || !this.db) {
       return;
     }

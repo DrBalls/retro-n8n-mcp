@@ -4,17 +4,20 @@ import { Logger } from '../../utils/Logger.js';
 // Mock Redis interface for when Redis is not available
 interface RedisInterface {
   get(key: string): Promise<string | null>;
-  set(key: string, value: string, mode?: string, duration?: number): Promise<string | null>;
-  setex(key: string, seconds: number, value: string): Promise<string>;
-  del(key: string): Promise<number>;
+  set(key: string, value: string, options?: { EX?: number }): Promise<string | null>;
+  setEx(key: string, seconds: number, value: string): Promise<string>;
+  del(...keys: string[]): Promise<number>;
   keys(pattern: string): Promise<string[]>;
-  flushdb(): Promise<string>;
-  mget(...keys: string[]): Promise<(string | null)[]>;
-  mset(...keyValues: string[]): Promise<string>;
+  flushDb(): Promise<string>;
+  mGet(keys: string[]): Promise<(string | null)[]>;
+  mSet(keyValues: [string, string][]): Promise<string>;
   ping(): Promise<string>;
   quit(): Promise<string>;
   info(section?: string): Promise<string>;
-  dbsize(): Promise<number>;
+  dbSize(): Promise<number>;
+  on?(event: string, callback: (error?: any) => void): void;
+  connect?(): Promise<void>;
+  disconnect?(): Promise<void>;
 }
 
 interface RedisCacheConfig {
@@ -83,33 +86,61 @@ export class RedisCacheLayer implements ICacheLayer {
         return;
       }
 
-      // Create Redis client
-      this.client = Redis.createClient({
+      // Create Redis client and wrap it to match our interface
+      const redisClient = Redis.createClient({
         url: `redis://${this.config.host}:${this.config.port}`,
         password: this.config.password,
         database: this.config.db,
       });
+      
+      // Wrap the Redis client to match our interface
+      this.client = {
+        get: (key: string) => redisClient.get(key),
+        set: (key: string, value: string, options?: { EX?: number }) => 
+          options?.EX ? redisClient.setEx(key, options.EX, value) : redisClient.set(key, value),
+        setEx: (key: string, seconds: number, value: string) => redisClient.setEx(key, seconds, value),
+        del: (...keys: string[]) => redisClient.del(keys),
+        keys: (pattern: string) => redisClient.keys(pattern),
+        flushDb: () => redisClient.flushDb(),
+        mGet: (keys: string[]) => redisClient.mGet(keys),
+        mSet: (keyValues: [string, string][]) => {
+          const args: string[] = [];
+          keyValues.forEach(([k, v]) => args.push(k, v));
+          return redisClient.mSet(args as any);
+        },
+        ping: () => redisClient.ping(),
+        quit: () => redisClient.quit(),
+        info: (section?: string) => redisClient.info(section),
+        dbSize: () => redisClient.dbSize(),
+        on: redisClient.on ? redisClient.on.bind(redisClient) : undefined,
+        connect: redisClient.connect ? async () => { await redisClient.connect(); } : undefined,
+        disconnect: redisClient.disconnect ? redisClient.disconnect.bind(redisClient) : undefined,
+      };
 
       // Handle connection events
-      this.client.on?.('connect', () => {
-        this.isConnected = true;
-        this.logger.info('Connected to Redis');
-      });
+      if (this.client && this.client.on) {
+        this.client.on('connect', () => {
+          this.isConnected = true;
+          this.logger.info('Connected to Redis');
+        });
 
-      this.client.on?.('error', (error) => {
-        this.isConnected = false;
-        this.stats.connectionErrors++;
-        this.logger.error('Redis connection error', { error });
-      });
+        this.client.on('error', (error: any) => {
+          this.isConnected = false;
+          this.stats.connectionErrors++;
+          this.logger.error('Redis connection error', { error });
+        });
 
-      this.client.on?.('end', () => {
-        this.isConnected = false;
-        this.logger.warn('Redis connection ended');
-      });
+        this.client.on('end', () => {
+          this.isConnected = false;
+          this.logger.warn('Redis connection ended');
+        });
+      }
 
       // Connect to Redis
-      await this.client.connect?.();
-      this.isConnected = true;
+      if (this.client && this.client.connect) {
+        await this.client.connect();
+        this.isConnected = true;
+      }
       
     } catch (error) {
       this.logger.error('Failed to initialize Redis client', { error });
@@ -170,8 +201,7 @@ export class RedisCacheLayer implements ICacheLayer {
       await this.client.set(
         this.buildKey(key),
         JSON.stringify(entry),
-        'EX',
-        Math.ceil((entry.ttl || this.config.ttlMs) / 1000)
+        { EX: Math.ceil((entry.ttl || this.config.ttlMs) / 1000) }
       );
 
       this.stats.hits++;
@@ -205,7 +235,7 @@ export class RedisCacheLayer implements ICacheLayer {
 
       await this.measureLatency(async () => {
         const serialized = JSON.stringify(entry);
-        return await this.client!.setex(
+        return await this.client!.setEx(
           this.buildKey(key),
           Math.ceil(ttl / 1000),
           serialized
@@ -273,7 +303,7 @@ export class RedisCacheLayer implements ICacheLayer {
     try {
       const redisKeys = keys.map(key => this.buildKey(key));
       const results = await this.measureLatency(async () => {
-        return await this.client!.mget(...redisKeys);
+        return await this.client!.mGet(redisKeys);
       });
 
       const entries = new Map<string, CacheEntry>();
@@ -338,7 +368,12 @@ export class RedisCacheLayer implements ICacheLayer {
       }
 
       await this.measureLatency(async () => {
-        return await this.client!.mset(...keyValues);
+        // Convert array to key-value pairs for mSet
+        const pairs: [string, string][] = [];
+        for (let i = 0; i < keyValues.length; i += 2) {
+          pairs.push([keyValues[i], keyValues[i + 1]]);
+        }
+        return await this.client!.mSet(pairs);
       });
 
       // Set TTL for each key (Redis MSET doesn't support TTL)
@@ -346,7 +381,7 @@ export class RedisCacheLayer implements ICacheLayer {
       for (const [key, data] of entries) {
         const ttl = data.ttl || this.config.ttlMs;
         ttlPromises.push(
-          this.client!.setex(
+          this.client!.setEx(
             this.buildKey(key),
             Math.ceil(ttl / 1000),
             JSON.stringify({
@@ -462,7 +497,7 @@ export class RedisCacheLayer implements ICacheLayer {
 
     try {
       if (this.isConnected && this.client) {
-        totalItems = await this.client.dbsize();
+        totalItems = await this.client.dbSize();
         
         // Get memory info if available
         const info = await this.client.info('memory');
@@ -534,15 +569,15 @@ class MockRedisClient implements RedisInterface {
     return this.data.get(key) || null;
   }
 
-  async set(key: string, value: string, mode?: string, duration?: number): Promise<string | null> {
+  async set(key: string, value: string, options?: { EX?: number }): Promise<string | null> {
     this.data.set(key, value);
-    if (mode === 'EX' && duration) {
-      this.expirations.set(key, Date.now() + duration * 1000);
+    if (options?.EX) {
+      this.expirations.set(key, Date.now() + options.EX * 1000);
     }
     return 'OK';
   }
 
-  async setex(key: string, seconds: number, value: string): Promise<string> {
+  async setEx(key: string, seconds: number, value: string): Promise<string> {
     this.data.set(key, value);
     this.expirations.set(key, Date.now() + seconds * 1000);
     return 'OK';
@@ -564,23 +599,19 @@ class MockRedisClient implements RedisInterface {
     return Array.from(this.data.keys()).filter(key => regex.test(key));
   }
 
-  async flushdb(): Promise<string> {
+  async flushDb(): Promise<string> {
     this.data.clear();
     this.expirations.clear();
     return 'OK';
   }
 
-  async mget(...keys: string[]): Promise<(string | null)[]> {
+  async mGet(keys: string[]): Promise<(string | null)[]> {
     return Promise.all(keys.map(key => this.get(key)));
   }
 
-  async mset(...keyValues: string[]): Promise<string> {
-    for (let i = 0; i < keyValues.length; i += 2) {
-      const key = keyValues[i];
-      const value = keyValues[i + 1];
-      if (key && value !== undefined) {
-        this.data.set(key, value);
-      }
+  async mSet(keyValues: [string, string][]): Promise<string> {
+    for (const [key, value] of keyValues) {
+      this.data.set(key, value);
     }
     return 'OK';
   }
@@ -597,7 +628,7 @@ class MockRedisClient implements RedisInterface {
     return 'used_memory:1024\nconnected_clients:1';
   }
 
-  async dbsize(): Promise<number> {
+  async dbSize(): Promise<number> {
     return this.data.size;
   }
 }

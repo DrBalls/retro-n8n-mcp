@@ -37,10 +37,10 @@ class AnalyticsEventStore {
       filtered = filtered.filter(e => e.sessionId === filter.sessionId);
     }
     if (filter?.start) {
-      filtered = filtered.filter(e => e.timestamp >= filter.start);
+      filtered = filtered.filter(e => e.timestamp >= filter.start!);
     }
     if (filter?.end) {
-      filtered = filtered.filter(e => e.timestamp <= filter.end);
+      filtered = filtered.filter(e => e.timestamp <= filter.end!);
     }
 
     return filtered;
