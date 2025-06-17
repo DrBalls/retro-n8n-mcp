@@ -85,9 +85,11 @@ export class DependencyGraphTool extends BaseTool {
             Object.values(targets).forEach(outputs => {
                 outputs.forEach(connections => {
                     connections.forEach(conn => {
-                        const targetNode = graph.get(conn.node);
+                        // Handle both connection formats
+                        const targetNodeId = 'node' in conn ? conn.node : conn.target.id;
+                        const targetNode = graph.get(targetNodeId);
                         if (targetNode) {
-                            sourceNode.dependents.push(conn.node);
+                            sourceNode.dependents.push(targetNodeId);
                             targetNode.dependencies.push(sourceId);
                         }
                     });

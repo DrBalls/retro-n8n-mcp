@@ -60,7 +60,8 @@ export class AuditLogger {
             result: 'failure',
             details: {
                 error: error instanceof Error ? error.message : error,
-                stack: error instanceof Error ? error.stack : undefined
+                stack: error instanceof Error ? error.stack : undefined,
+                ...context.details
             },
             ...context
         });
@@ -72,7 +73,7 @@ export class AuditLogger {
         this.logEvent({
             action,
             result: 'denied',
-            details: { reason },
+            details: { reason, ...context.details },
             ...context
         });
     }

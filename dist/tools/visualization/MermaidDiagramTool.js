@@ -97,7 +97,8 @@ export class MermaidDiagramTool extends BaseTool {
             Object.entries(targets).forEach(([outputType, outputConnections]) => {
                 outputConnections.forEach((connections, outputIndex) => {
                     connections.forEach(connection => {
-                        const targetId = this.sanitizeId(connection.node);
+                        const targetNodeId = 'node' in connection ? connection.node : connection.target.id;
+                        const targetId = this.sanitizeId(targetNodeId);
                         const label = outputType !== 'main' || outputIndex > 0 ?
                             `|${outputType}[${outputIndex}]|` : '';
                         lines.push(`    ${sourceId} ${label}-->|${outputType}| ${targetId}`);

@@ -392,7 +392,7 @@ export class N8nMcpServer {
         };
 
         // Get tool metadata to determine permission
-        const tool = this.toolRegistry.getTool(name);
+        const tool = this.toolRegistry.get(name);
         const permission = tool?.getMetadata ? 
           `${tool.getMetadata().category}.${name}` : 
           `tool.${name}`;

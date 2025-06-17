@@ -41,8 +41,8 @@ export declare class SLOStatusTool extends BaseTool {
         isMutating: boolean;
         requiresAuth: boolean;
         rateLimit: {
-            maxCalls: number;
-            windowMs: number;
+            requests: number;
+            window: number;
         };
     };
 }

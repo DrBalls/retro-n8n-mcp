@@ -111,6 +111,7 @@ export class AuditLogger {
       userId?: string;
       apiKeyId?: string;
       resource?: IAuditEvent['resource'];
+      details?: Record<string, unknown>;
       metadata?: IAuditEvent['metadata'];
     }
   ): void {
@@ -119,7 +120,8 @@ export class AuditLogger {
       result: 'failure',
       details: {
         error: error instanceof Error ? error.message : error,
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
+        ...context.details
       },
       ...context
     });
@@ -135,13 +137,14 @@ export class AuditLogger {
       userId?: string;
       apiKeyId?: string;
       resource?: IAuditEvent['resource'];
+      details?: Record<string, unknown>;
       metadata?: IAuditEvent['metadata'];
     }
   ): void {
     this.logEvent({
       action,
       result: 'denied',
-      details: { reason },
+      details: { reason, ...context.details },
       ...context
     });
   }
@@ -178,11 +181,11 @@ export class AuditLogger {
     }
 
     if (query.startTime) {
-      results = results.filter(e => e.timestamp >= query.startTime);
+      results = results.filter(e => e.timestamp >= query.startTime!);
     }
 
     if (query.endTime) {
-      results = results.filter(e => e.timestamp <= query.endTime);
+      results = results.filter(e => e.timestamp <= query.endTime!);
     }
 
     // Sort by timestamp (newest first)

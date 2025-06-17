@@ -55,6 +55,7 @@ export declare class AuditLogger {
         userId?: string;
         apiKeyId?: string;
         resource?: IAuditEvent['resource'];
+        details?: Record<string, unknown>;
         metadata?: IAuditEvent['metadata'];
     }): void;
     /**
@@ -64,6 +65,7 @@ export declare class AuditLogger {
         userId?: string;
         apiKeyId?: string;
         resource?: IAuditEvent['resource'];
+        details?: Record<string, unknown>;
         metadata?: IAuditEvent['metadata'];
     }): void;
     /**
