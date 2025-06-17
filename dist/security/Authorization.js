@@ -361,9 +361,9 @@ export class Authorization {
         return false;
     }
     /**
-     * Can access resource with advanced checks
+     * Can access resource with advanced checks including sharing and ownership
      */
-    canAccessResource(context, action) {
+    canAccessAdvancedResource(context, action) {
         if (!context.resource || !context.user) {
             return false;
         }

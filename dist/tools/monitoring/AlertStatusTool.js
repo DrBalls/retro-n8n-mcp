@@ -81,7 +81,7 @@ export class AlertStatusTool extends BaseTool {
             subcategory: 'alerts',
             isMutating: true,
             requiresAuth: true,
-            rateLimit: { maxCalls: 50, windowMs: 60000 }
+            rateLimit: { requests: 50, window: 60 }
         };
     }
 }

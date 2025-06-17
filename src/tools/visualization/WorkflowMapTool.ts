@@ -132,13 +132,15 @@ export class WorkflowMapTool extends BaseTool {
       Object.entries(targets).forEach(([outputType, outputConnections]) => {
         outputConnections.forEach((connList, outputIndex) => {
           connList.forEach(conn => {
+            const targetNodeId = 'node' in conn ? conn.node : conn.target.id;
+            const targetInput = 'index' in conn ? (conn.index || 0) : (conn.target.inputIndex || 0);
             connections.push({
               source: sourceNodeId,
-              target: conn.node,
+              target: targetNodeId,
               sourceOutput: outputIndex,
-              targetInput: conn.index || 0,
+              targetInput,
               type: outputType,
-              dataTransferred: this.getDataTransferInfo(sourceNodeId, conn.node, executionData),
+              dataTransferred: this.getDataTransferInfo(sourceNodeId, targetNodeId, executionData),
             });
           });
         });

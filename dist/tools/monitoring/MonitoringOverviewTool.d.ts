@@ -21,8 +21,8 @@ export declare class MonitoringOverviewTool extends BaseTool {
         isMutating: boolean;
         requiresAuth: boolean;
         rateLimit: {
-            maxCalls: number;
-            windowMs: number;
+            requests: number;
+            window: number;
         };
     };
 }

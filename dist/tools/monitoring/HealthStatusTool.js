@@ -67,7 +67,7 @@ export class HealthStatusTool extends BaseTool {
             subcategory: 'health',
             isMutating: false,
             requiresAuth: false,
-            rateLimit: { maxCalls: 100, windowMs: 60000 }
+            rateLimit: { requests: 100, window: 60 }
         };
     }
 }

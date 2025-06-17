@@ -23,8 +23,8 @@ export declare class HealthStatusTool extends BaseTool {
         isMutating: boolean;
         requiresAuth: boolean;
         rateLimit: {
-            maxCalls: number;
-            windowMs: number;
+            requests: number;
+            window: number;
         };
     };
 }

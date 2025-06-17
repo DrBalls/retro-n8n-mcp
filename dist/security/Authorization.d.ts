@@ -46,6 +46,10 @@ export declare class Authorization {
      */
     hasPermission(context: IAuthorizationContext, permission: string): boolean;
     /**
+     * Check if a user can access a resource
+     */
+    canAccessResource(context: IAuthorizationContext, action: string): boolean;
+    /**
      * Grant permission to a user for a specific resource
      */
     grantResourcePermission(resourceId: string, userId: string, permissions: string[]): void;
@@ -105,5 +109,18 @@ export declare class Authorization {
      * Check if a permission matches a pattern (with wildcard support)
      */
     permissionMatches(pattern: string, permission: string): boolean;
+    /**
+     * Can access resource with advanced checks including sharing and ownership
+     */
+    canAccessAdvancedResource(context: {
+        user?: IUser;
+        resource?: {
+            type: string;
+            id: string;
+            ownerId?: string;
+            sharedWith?: string[];
+            isPublic?: boolean;
+        };
+    }, action: string): boolean;
 }
 //# sourceMappingURL=Authorization.d.ts.map
