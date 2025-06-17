@@ -21,7 +21,7 @@ A comprehensive MCP (Model Context Protocol) server providing full access to n8n
 
 ### From NPM (Recommended)
 ```bash
-npm install -g @retro/n8n-mcp-server
+npm install -g @drballs/n8n-mcp-server
 ```
 
 ### From Source
@@ -59,7 +59,7 @@ Add to your Claude Desktop configuration file:
   "mcpServers": {
     "n8n": {
       "command": "npx",
-      "args": ["@retro/n8n-mcp-server"],
+      "args": ["@drballs/n8n-mcp-server"],
       "env": {
         "N8N_API_KEY": "your_n8n_api_key_here",
         "N8N_BASE_URL": "https://your-n8n-instance.com"
@@ -75,7 +75,7 @@ Add to your Claude Desktop configuration file:
   "mcpServers": {
     "n8n": {
       "command": "npx",
-      "args": ["@retro/n8n-mcp-server"],
+      "args": ["@drballs/n8n-mcp-server"],
       "env": {
         "N8N_API_KEY": "your_n8n_api_key_here",
         "N8N_BASE_URL": "https://your-n8n-instance.com"
@@ -216,7 +216,7 @@ User: List all active alerts and their severity levels
 ### Connection Issues
 ```bash
 # Test n8n connection
-npx @retro/n8n-mcp-server test-connection
+npx @drballs/n8n-mcp-server test-connection
 
 # Check environment variables
 echo $N8N_API_KEY
@@ -304,8 +304,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 💡 Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-org/retro-n8n-mcp/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/retro-n8n-mcp/discussions)
+- **Issues**: [GitHub Issues](https://github.com/DrBalls/retro-n8n-mcp/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/DrBalls/retro-n8n-mcp/discussions)
+- **NPM Package**: [npmjs.com/package/@drballs/n8n-mcp-server](https://www.npmjs.com/package/@drballs/n8n-mcp-server)
 - **n8n Community**: [n8n Community Forum](https://community.n8n.io)
 
 ---

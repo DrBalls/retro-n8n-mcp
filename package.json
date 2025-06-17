@@ -1,5 +1,5 @@
 {
-  "name": "@retro/n8n-mcp-server",
+  "name": "@drballs/n8n-mcp-server",
   "version": "0.1.3",
   "description": "Comprehensive n8n MCP server providing full access to n8n's workflow automation capabilities (Production Build)",
   "main": "dist/index.js",
