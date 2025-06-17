@@ -364,7 +364,7 @@ export class RealtimeMonitoringService extends EventEmitter {
 
     // Initial fetch
     try {
-      const execution = await this.apiClient.request('GET', `/executions/${executionId}`);
+      const execution = await this.apiClient.request('GET', `/executions/${executionId}`) as any;
       lastStatus = execution.status;
       this.handleExecutionUpdate(executionId, execution);
       this.monitoredExecutions.set(executionId, { startTime: Date.now(), lastStatus });
@@ -376,7 +376,7 @@ export class RealtimeMonitoringService extends EventEmitter {
     // Set up polling
     const timer = setInterval(async () => {
       try {
-        const execution = await this.apiClient.request('GET', `/executions/${executionId}`);
+        const execution = await this.apiClient.request('GET', `/executions/${executionId}`) as any;
         
         // Check for changes
         if (execution.status !== lastStatus) {
@@ -446,7 +446,7 @@ export class RealtimeMonitoringService extends EventEmitter {
           workflowId,
           limit: includePast ? 100 : 10
         }
-      });
+      }) as any[];
 
       // Calculate metrics
       const metrics: IWorkflowMetrics = {
