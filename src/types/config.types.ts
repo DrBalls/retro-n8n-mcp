@@ -94,8 +94,11 @@ export type ApiRequestOptions = z.infer<typeof ApiRequestOptionsSchema>;
 export function getN8nConfigFromEnv(): Partial<N8nApiConfig> {
   const config: Partial<N8nApiConfig> = {};
   
+  // Support both N8N_API_URL and N8N_BASE_URL for backwards compatibility
   if (process.env['N8N_API_URL']) {
     config.baseUrl = process.env['N8N_API_URL'];
+  } else if (process.env['N8N_BASE_URL']) {
+    config.baseUrl = process.env['N8N_BASE_URL'];
   }
   
   if (process.env['N8N_API_KEY']) {

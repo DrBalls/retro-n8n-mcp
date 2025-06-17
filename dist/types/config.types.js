@@ -72,8 +72,12 @@ export const ApiRequestOptionsSchema = z.object({
 // Environment variable helper
 export function getN8nConfigFromEnv() {
     const config = {};
+    // Support both N8N_API_URL and N8N_BASE_URL for backwards compatibility
     if (process.env['N8N_API_URL']) {
         config.baseUrl = process.env['N8N_API_URL'];
+    }
+    else if (process.env['N8N_BASE_URL']) {
+        config.baseUrl = process.env['N8N_BASE_URL'];
     }
     if (process.env['N8N_API_KEY']) {
         config.apiKey = process.env['N8N_API_KEY'];
