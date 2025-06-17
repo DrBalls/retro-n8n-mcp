@@ -54,11 +54,8 @@ export class Logger {
       Logger.logs.shift();
     }
 
-    // Output to console
-    const logMethod = level === 'error' ? console.error : 
-                     level === 'warn' ? console.warn : 
-                     level === 'debug' ? console.debug : 
-                     console.log;
+    // Output to console - ALL logs must go to stderr for MCP protocol
+    const logMethod = console.error;
 
     if (context && Object.keys(context).length > 0) {
       logMethod(`[${entry.timestamp}] [${level.toUpperCase()}] ${entry.message}`, context);

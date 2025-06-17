@@ -60,7 +60,7 @@ class TraceContext {
 class ConsoleExporter {
     async export(spans) {
         spans.forEach(span => {
-            console.log('Telemetry Span:', {
+            console.error('Telemetry Span:', {
                 traceId: span.traceId,
                 spanId: span.spanId,
                 operation: span.operation,

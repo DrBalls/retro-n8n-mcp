@@ -332,7 +332,7 @@ export class MonitoringService extends EventEmitter implements IMonitoringServic
     // Start server
     await new Promise<void>((resolve) => {
       this.metricsServer = app.listen(this.metricsPort, () => {
-        console.log(`Metrics server listening on port ${this.metricsPort}`);
+        console.error(`Metrics server listening on port ${this.metricsPort}`);
         resolve();
       });
     });
